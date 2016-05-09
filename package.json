@@ -1,0 +1,14 @@
+{
+  "name": "pp-mws",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "pretest": "tsc -p spec",
+    "test": "jasmine",
+    "prestart": "tsc",
+    "start": "node bin/server.js"
+  },
+  "devDependencies": {
+    "jasmine": "2.4.1"
+  }
+}
