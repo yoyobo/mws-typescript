@@ -19,43 +19,164 @@ module Amazon {
         MaxResultsPerPage? : number;
     }
 
-    export function urlEncode(input : string) : string {
-        input = encodeURIComponent(input);
-        input = input.replace(/\*/g, '%2A');
-        input = input.replace(/\(/g, '%28');
-        input = input.replace(/\)/g, '%29');
-        input = input.replace(/'/g, '%27');
-        input = input.replace(/!/g, '%21');
-        return input;
+    export interface Credentials {
+        sellerId : string;
+        awsAccountId : string;
+        secretKey : string;
+        host : string;
     }
 
-    export class MWS {
-        private sellerId : string;
-        private awsAccountId : string;
-        private secretKey : string;
-        private host : string;
+    export interface Dictionary<T> {
+        [key : string] : T
+    }
 
-        constructor() {
-            this.sellerId = process.env.AMAZON_MERCHANT_ID;
-            this.awsAccountId = process.env.AMAZON_ACCESS_KEY_ID;
-            this.secretKey = process.env.AMAZON_SECRET_ACCESS_KEY;
+    export interface Parameter {
+        serialize() : Dictionary<string>;
+    }
 
-            this.host = 'mws.amazonservices.de';
+    export class StringParameter implements Parameter {
+        constructor(private key : string, private value : string) {
         }
 
-        private getStringToSign(input : {[key : string] : string}, endpoint : string) : string {
-            var keys = [];
-            for(var k in input) keys.push(k);
-            var str = '';
+        serialize() : Dictionary<string> {
+            var result : Dictionary<string> = {};
+            result[this.key] = this.value;
+            return result;
+        }
+    }
 
-            keys = keys.sort();
+    export class TimestampParameter implements Parameter {
+        constructor(private key : string, private value : moment.Moment) {
+        }
 
-            for(var i=0;i<keys.length;i++) {
-                if(i != 0) str += '&';
-                str += keys[i] + '=' + input[keys[i]];
+        serialize() : Dictionary<string> {
+            var result : Dictionary<string> = {};
+            result[this.key] = this.value.toISOString();
+            return result;
+        }
+    }
+
+    export class ListParameter implements Parameter {
+        private values : string[];
+        constructor(private key : string, values? : string[]) {
+            this.values = values || [];
+        }
+
+        public push(value : string) {
+            this.values.push(value);
+        }
+
+        public serialize() : Dictionary<string> {
+            var result : Dictionary<string> = {};
+
+            var count = 0;
+            _.each(this.values, (value : string) => {
+                result[this.key + '.' + ++count] = value;
+            });
+
+            return result;
+        }
+    }
+
+    export interface ResultCallback {
+        (err? : any, result? : any) : void;
+    }
+
+    export class Request {
+        private parameters : Parameter[];
+
+        constructor(private endpoint : string, private credentials : Credentials) {
+            this.parameters = [];
+            this.addParam(new StringParameter('AWSAccessKeyId', this.credentials.awsAccountId));
+            this.addParam(new StringParameter('SignatureMethod', 'HmacSHA256'));
+            this.addParam(new StringParameter('SignatureVersion', '2'));
+            this.addParam(new TimestampParameter('Timestamp', moment()));
+        }
+
+        public addParam(param : Parameter) {
+            this.parameters.push(param);
+        }
+
+        public send(callback : ResultCallback) {
+            var signature : string = this.getSignature();
+            this.addParam(new StringParameter('Signature', signature));
+
+            var userAgent : string = 'pptest/1.0 (Language=Javascript)';
+            var contentType : string = 'text/xml';
+
+            var queryString : string = this.getQueryString();
+
+            console.log('queryString', queryString);
+
+            request.post('https://' + this.credentials.host + this.endpoint + '?' + queryString, {
+                headers : {
+                    'x-amazon-user-agent' : userAgent,
+                    'Content-Type' : contentType
+                }
+            }, callback);
+        }
+
+        private getSignature() : string {
+            let strToSign : string = this.getStringToSign(this.endpoint);
+            let hmac : string = crypto.createHmac('sha256', this.credentials.secretKey).update(strToSign).digest('hex');
+
+            let b64hmac : string = this.hexStrToBase64(hmac);
+
+            //padding to string length multiple of 4
+            var j = b64hmac.length % 4;
+            for (var i = 0; i < j; i++) {
+                b64hmac += '=';
             }
 
-            return ['POST', this.host, endpoint, str].join('\n');
+            return b64hmac;
+        }
+
+        private getQueryString() : string {
+            var input : Dictionary<string>= {};
+
+            _.each(this.parameters, function(param : Parameter) {
+                var serialized : Dictionary<string> = param.serialize();
+                _.extend(input, serialized);
+            });
+
+            var queryArray = [];
+            _.each(input, (value, key) => {
+                queryArray.push(key + '=' + this.urlEncode(value));
+            });
+
+            return queryArray.join('&');
+        }
+
+        private getStringToSign(endpoint : string) : string {
+            var input = {};
+
+            _.each(this.parameters, function(param : Parameter) {
+                var serialized : Dictionary<string> = param.serialize();
+                _.extend(input, serialized);
+            });
+
+            var keys = _.keys(input).sort();
+
+            var str = '';
+            for(var i = 0; i < keys.length; i++) {
+                if (i != 0) {
+                    str += '&';
+                }
+
+                str += keys[i] + '=' + this.urlEncode(input[keys[i]]);
+            }
+
+            return ['POST', this.credentials.host, endpoint, str].join('\n');
+        }
+
+        private urlEncode(input : string) : string {
+            input = encodeURIComponent(input);
+            input = input.replace(/\*/g, '%2A');
+            input = input.replace(/\(/g, '%28');
+            input = input.replace(/\)/g, '%29');
+            input = input.replace(/'/g, '%27');
+            input = input.replace(/!/g, '%21');
+            return input;
         }
 
         private hexStrToBase64(input:string):string {
@@ -85,59 +206,43 @@ module Amazon {
 
             return output;
         }
+    }
 
-        public createSignature(input : {[key : string] : string}, secret : string, endpoint : string) : string {
-            let strToSign : string = this.getStringToSign(input, endpoint);
-            let hmac : string = crypto.createHmac('sha256', secret).update(strToSign).digest('hex');
+    export class MWS {
+        public credentials : Credentials;
+        constructor() {
+            this.credentials = {
+                sellerId : process.env.AMAZON_MERCHANT_ID,
+                awsAccountId : process.env.AMAZON_ACCESS_KEY_ID,
+                secretKey : process.env.AMAZON_SECRET_ACCESS_KEY,
+                host : 'mws.amazonservices.de'
+            };
 
-            let b64hmac : string = this.hexStrToBase64(hmac);
+            this.Orders = new Orders(this, process.env.AMAZON_MARKETPLACE_ID)
+        }
 
-            //padding to string length multiple of 4
-            var j = b64hmac.length % 4;
-            for (var i = 0; i < j; i++) {
-                b64hmac += '=';
-            }
+        public Orders : Orders;
+    }
 
-            return b64hmac;
+    export class Orders {
+        private endpoint : string = '/Orders/2013-09-01';
+        private version : string = '2013-09-01'
+
+        constructor(private mws : MWS, private marketplaceId : string) {
+
         }
 
         public listOrders(options : ListOrdersRequest, callback : (err? : any, result? : any) => void) {
-            let endpoint : string = '/Orders/2013-09-01';
+            var request : Request = new Request(this.endpoint, this.mws.credentials);
 
-            var parameters : {[key : string] : string} = {};
-            // parameters to be signed
-            parameters['Action'] = 'ListOrders';
-            parameters['SellerId'] = urlEncode(this.sellerId);
-            parameters['CreatedAfter'] = urlEncode(options.CreatedAfter.toISOString());
-            var count = 0;
-            _.each(options['MarketplaceId.Id'], (id : string) => {
-                parameters['MarketplaceId.Id.' + ++count] = urlEncode(id);
-            });
-            parameters['AWSAccessKeyId'] = this.awsAccountId;
-            parameters['SignatureMethod'] = 'HmacSHA256';
-            parameters['SignatureVersion'] = '2';
+            request.addParam(new StringParameter('Action', 'ListOrders'));
+            request.addParam(new StringParameter('SellerId', this.mws.credentials.sellerId));
 
-            parameters['Timestamp'] = urlEncode(moment().toISOString());
-            parameters['Version'] = '2013-09-01';
+            request.addParam(new TimestampParameter('CreatedAfter', options.CreatedAfter));
+            request.addParam(new ListParameter('MarketplaceId.Id', options['MarketplaceId.Id']));
+            request.addParam(new StringParameter('Version', this.version));
 
-            // signature
-            parameters['Signature'] = urlEncode(this.createSignature(parameters, this.secretKey, endpoint));
-
-            var userAgent : string = 'pptest/1.0 (Language=Javascript)';
-            var contentType : string = 'text/xml';
-
-            var queryString : string = _.map(parameters, function(value, key) {
-                return key + '=' + value;
-            }).join('&');
-
-            console.log('queryString', queryString);
-
-            request.post('https://' + this.host + endpoint + '?' + queryString, {
-                headers : {
-                    'x-amazon-user-agent' : userAgent,
-                    'Content-Type' : contentType
-                }
-            }, callback);
+            request.send(callback);
         }
     }
 }
