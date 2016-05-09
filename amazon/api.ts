@@ -218,7 +218,7 @@ module Amazon {
                 host : 'mws.amazonservices.de'
             };
 
-            this.Orders = new Orders(this, process.env.AMAZON_MARKETPLACE_ID)
+            this.Orders = new Orders(this)
         }
 
         public Orders : Orders;
@@ -226,9 +226,9 @@ module Amazon {
 
     export class Orders {
         private endpoint : string = '/Orders/2013-09-01';
-        private version : string = '2013-09-01'
+        private version : string = '2013-09-01';
 
-        constructor(private mws : MWS, private marketplaceId : string) {
+        constructor(private mws : MWS) {
 
         }
 
