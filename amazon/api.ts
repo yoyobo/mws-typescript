@@ -30,20 +30,20 @@ module Amazon {
     }
 
     export class MWS {
-        private endpoint : string;
         private sellerId : string;
         private awsAccountId : string;
         private secretKey : string;
+        private host : string;
 
         constructor() {
             this.sellerId = process.env.AMAZON_MERCHANT_ID;
             this.awsAccountId = process.env.AMAZON_ACCESS_KEY_ID;
             this.secretKey = process.env.AMAZON_SECRET_ACCESS_KEY;
 
-            this.endpoint = '/Orders/2013-09-01'
+            this.host = 'mws.amazonservices.de';
         }
 
-        private getStringToSign(input : {[key : string] : string}) : string {
+        private getStringToSign(input : {[key : string] : string}, endpoint : string) : string {
             var keys = [];
             for(var k in input) keys.push(k);
             var str = '';
@@ -55,10 +55,7 @@ module Amazon {
                 str += keys[i] + '=' + input[keys[i]];
             }
 
-            return 'POST\n' +
-                'mws.amazonservices.de\n' +
-                this.endpoint + '\n' +
-                str;
+            return ['POST', this.host, endpoint, str].join('\n');
         }
 
         private hexStrToBase64(input:string):string {
@@ -89,8 +86,8 @@ module Amazon {
             return output;
         }
 
-        public createSignature(input : {[key : string] : string}, secret : string) : string {
-            let strToSign : string = this.getStringToSign(input);
+        public createSignature(input : {[key : string] : string}, secret : string, endpoint : string) : string {
+            let strToSign : string = this.getStringToSign(input, endpoint);
             let hmac : string = crypto.createHmac('sha256', secret).update(strToSign).digest('hex');
 
             let b64hmac : string = this.hexStrToBase64(hmac);
@@ -105,6 +102,8 @@ module Amazon {
         }
 
         public listOrders(options : ListOrdersRequest, callback : (err? : any, result? : any) => void) {
+            let endpoint : string = '/Orders/2013-09-01';
+
             var parameters : {[key : string] : string} = {};
             // parameters to be signed
             parameters['Action'] = 'ListOrders';
@@ -122,7 +121,7 @@ module Amazon {
             parameters['Version'] = '2013-09-01';
 
             // signature
-            parameters['Signature'] = urlEncode(this.createSignature(parameters, this.secretKey));
+            parameters['Signature'] = urlEncode(this.createSignature(parameters, this.secretKey, endpoint));
 
             var userAgent : string = 'pptest/1.0 (Language=Javascript)';
             var contentType : string = 'text/xml';
@@ -133,7 +132,7 @@ module Amazon {
 
             console.log('queryString', queryString);
 
-            request.post('https://mws.amazonservices.de' + this.endpoint + '?' + queryString, {
+            request.post('https://' + this.host + endpoint + '?' + queryString, {
                 headers : {
                     'x-amazon-user-agent' : userAgent,
                     'Content-Type' : contentType
