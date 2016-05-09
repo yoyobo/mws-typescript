@@ -2,75 +2,77 @@ import _ = require('underscore');
 import moment = require('moment');
 import crypto = require('crypto');
 import request = require('request');
+import AmazonTypes = require('./types');
+var xmlParse = require('xml2js').parseString;
 
 module Amazon {
     export interface ListOrdersRequest {
-        CreatedAfter : moment.Moment;
-        CreatedBefore? : string;
-        LastUpdatedAfter? : string;
-        LastUpdatedBefore? : string;
-        'MarketplaceId.Id' : string[];
-        'OrderStatus.Status'? : string[];
-        'FulfillmentChannel.Channel'? : string[];
-        SellerOrderId? : string;
+        CreatedAfter: moment.Moment;
+        CreatedBefore?: string;
+        LastUpdatedAfter?: string;
+        LastUpdatedBefore?: string;
+        'MarketplaceId.Id': string[];
+        'OrderStatus.Status'?: string[];
+        'FulfillmentChannel.Channel'?: string[];
+        SellerOrderId?: string;
         BuyerEmail?: string;
-        'PaymentMethod.Method'? : string[];
-        'TFMShipmentStatus.Status'? : string[];
-        MaxResultsPerPage? : number;
+        'PaymentMethod.Method'?: string[];
+        'TFMShipmentStatus.Status'?: string[];
+        MaxResultsPerPage?: number;
     }
 
     export interface Credentials {
-        sellerId : string;
-        awsAccountId : string;
-        secretKey : string;
-        host : string;
+        sellerId: string;
+        awsAccountId: string;
+        secretKey: string;
+        host: string;
     }
 
     export interface Dictionary<T> {
-        [key : string] : T
+        [key: string]: T
     }
 
     export interface Parameter {
-        serialize() : Dictionary<string>;
+        serialize(): Dictionary<string>;
     }
 
     export class StringParameter implements Parameter {
-        constructor(private key : string, private value : string) {
+        constructor(private key: string, private value: string) {
         }
 
-        serialize() : Dictionary<string> {
-            var result : Dictionary<string> = {};
+        serialize(): Dictionary<string> {
+            var result: Dictionary<string> = {};
             result[this.key] = this.value;
             return result;
         }
     }
 
     export class TimestampParameter implements Parameter {
-        constructor(private key : string, private value : moment.Moment) {
+        constructor(private key: string, private value: moment.Moment) {
         }
 
-        serialize() : Dictionary<string> {
-            var result : Dictionary<string> = {};
+        serialize(): Dictionary<string> {
+            var result: Dictionary<string> = {};
             result[this.key] = this.value.toISOString();
             return result;
         }
     }
 
     export class ListParameter implements Parameter {
-        private values : string[];
-        constructor(private key : string, values? : string[]) {
+        private values: string[];
+        constructor(private key: string, values?: string[]) {
             this.values = values || [];
         }
 
-        public push(value : string) {
+        public push(value: string) {
             this.values.push(value);
         }
 
-        public serialize() : Dictionary<string> {
-            var result : Dictionary<string> = {};
+        public serialize(): Dictionary<string> {
+            var result: Dictionary<string> = {};
 
             var count = 0;
-            _.each(this.values, (value : string) => {
+            _.each(this.values, (value: string) => {
                 result[this.key + '.' + ++count] = value;
             });
 
@@ -79,13 +81,13 @@ module Amazon {
     }
 
     export interface ResultCallback {
-        (err? : any, result? : any) : void;
+        (err: AmazonTypes.Error, result?: any): void;
     }
 
     export class Request {
-        private parameters : Parameter[];
+        private parameters: Parameter[];
 
-        constructor(private endpoint : string, private credentials : Credentials) {
+        constructor(private endpoint: string, private credentials: Credentials) {
             this.parameters = [];
             this.addParam(new StringParameter('AWSAccessKeyId', this.credentials.awsAccountId));
             this.addParam(new StringParameter('SignatureMethod', 'HmacSHA256'));
@@ -93,34 +95,48 @@ module Amazon {
             this.addParam(new TimestampParameter('Timestamp', moment()));
         }
 
-        public addParam(param : Parameter) {
+        public addParam(param: Parameter) {
             this.parameters.push(param);
         }
 
-        public send(callback : ResultCallback) {
-            var signature : string = this.getSignature();
+        public send(callback: ResultCallback) {
+            var signature: string = this.getSignature();
             this.addParam(new StringParameter('Signature', signature));
 
-            var userAgent : string = 'pptest/1.0 (Language=Javascript)';
-            var contentType : string = 'text/xml';
+            var userAgent: string = 'pptest/1.0 (Language=Javascript)';
+            var contentType: string = 'text/xml';
 
-            var queryString : string = this.getQueryString();
+            var queryString: string = this.getQueryString();
 
             console.log('queryString', queryString);
 
             request.post('https://' + this.credentials.host + this.endpoint + '?' + queryString, {
-                headers : {
-                    'x-amazon-user-agent' : userAgent,
-                    'Content-Type' : contentType
+                headers: {
+                    'x-amazon-user-agent': userAgent,
+                    'Content-Type': contentType
                 }
-            }, callback);
+            }, function(err, httpResponse, body) {
+                if (err)
+                    callback({origin:'PostRequest', message: err, metadata: httpResponse});
+                else {
+                    xmlParse(body, { explicitArray: false }, function(err, result) {
+                        if(err){
+                            callback({origin:'XMLParsing', message: err});
+                        } else if(_.has(result, 'ErrorResponse')) {
+                            callback({origin:'MWS', message:result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error']});
+                        } else {
+                            callback(null, result);
+                        }
+                    });
+                }
+            });
         }
 
-        private getSignature() : string {
-            let strToSign : string = this.getStringToSign(this.endpoint);
-            let hmac : string = crypto.createHmac('sha256', this.credentials.secretKey).update(strToSign).digest('hex');
+        private getSignature(): string {
+            let strToSign: string = this.getStringToSign(this.endpoint);
+            let hmac: string = crypto.createHmac('sha256', this.credentials.secretKey).update(strToSign).digest('hex');
 
-            let b64hmac : string = this.hexStrToBase64(hmac);
+            let b64hmac: string = this.hexStrToBase64(hmac);
 
             //padding to string length multiple of 4
             var j = b64hmac.length % 4;
@@ -131,11 +147,11 @@ module Amazon {
             return b64hmac;
         }
 
-        private getQueryString() : string {
-            var input : Dictionary<string>= {};
+        private getQueryString(): string {
+            var input: Dictionary<string> = {};
 
-            _.each(this.parameters, function(param : Parameter) {
-                var serialized : Dictionary<string> = param.serialize();
+            _.each(this.parameters, function(param: Parameter) {
+                var serialized: Dictionary<string> = param.serialize();
                 _.extend(input, serialized);
             });
 
@@ -147,18 +163,18 @@ module Amazon {
             return queryArray.join('&');
         }
 
-        private getStringToSign(endpoint : string) : string {
+        private getStringToSign(endpoint: string): string {
             var input = {};
 
-            _.each(this.parameters, function(param : Parameter) {
-                var serialized : Dictionary<string> = param.serialize();
+            _.each(this.parameters, function(param: Parameter) {
+                var serialized: Dictionary<string> = param.serialize();
                 _.extend(input, serialized);
             });
 
             var keys = _.keys(input).sort();
 
             var str = '';
-            for(var i = 0; i < keys.length; i++) {
+            for (var i = 0; i < keys.length; i++) {
                 if (i != 0) {
                     str += '&';
                 }
@@ -169,7 +185,7 @@ module Amazon {
             return ['POST', this.credentials.host, endpoint, str].join('\n');
         }
 
-        private urlEncode(input : string) : string {
+        private urlEncode(input: string): string {
             input = encodeURIComponent(input);
             input = input.replace(/\*/g, '%2A');
             input = input.replace(/\(/g, '%28');
@@ -179,7 +195,7 @@ module Amazon {
             return input;
         }
 
-        private hexStrToBase64(input:string):string {
+        private hexStrToBase64(input: string): string {
             let b64pad = '=';
 
             var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -209,31 +225,31 @@ module Amazon {
     }
 
     export class MWS {
-        public credentials : Credentials;
+        public credentials: Credentials;
         constructor() {
             this.credentials = {
-                sellerId : process.env.AMAZON_MERCHANT_ID,
-                awsAccountId : process.env.AMAZON_ACCESS_KEY_ID,
-                secretKey : process.env.AMAZON_SECRET_ACCESS_KEY,
-                host : 'mws.amazonservices.de'
+                sellerId: process.env.AMAZON_MERCHANT_ID,
+                awsAccountId: process.env.AMAZON_ACCESS_KEY_ID,
+                secretKey: process.env.AMAZON_SECRET_ACCESS_KEY,
+                host: 'mws.amazonservices.de'
             };
 
             this.Orders = new Orders(this)
         }
 
-        public Orders : Orders;
+        public Orders: Orders;
     }
 
     export class Orders {
-        private endpoint : string = '/Orders/2013-09-01';
-        private version : string = '2013-09-01';
+        private endpoint: string = '/Orders/2013-09-01';
+        private version: string = '2013-09-01';
 
-        constructor(private mws : MWS) {
+        constructor(private mws: MWS) {
 
         }
 
-        public listOrders(options : ListOrdersRequest, callback : (err? : any, result? : any) => void) {
-            var request : Request = new Request(this.endpoint, this.mws.credentials);
+        public listOrders(options: ListOrdersRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.ListOrdersResult) => void) {
+            var request: Request = new Request(this.endpoint, this.mws.credentials);
 
             request.addParam(new StringParameter('Action', 'ListOrders'));
             request.addParam(new StringParameter('SellerId', this.mws.credentials.sellerId));
@@ -242,8 +258,20 @@ module Amazon {
             request.addParam(new ListParameter('MarketplaceId.Id', options['MarketplaceId.Id']));
             request.addParam(new StringParameter('Version', this.version));
 
-            request.send(callback);
+            request.send(function(err, result) {
+                if (err) {
+                    callback(err);
+                }
+                else {
+                    callback(null, new AmazonTypes.ListOrdersResult(result));
+                }
+            });
+
         }
+
+        // public listOrderItems(options: listOrderItemsRequest, callback: (err?: any, result?: [AmazonTypes.ListOrderItemsResult]){
+        //
+        // }
     }
 }
 

@@ -2,6 +2,8 @@
 
 import moment = require('moment');
 import Amazon = require('../amazon/api');
+import util = require('util');
+var xmlParse = require('xml2js').parseString;
 
 describe('Amazon', function() {
 
@@ -15,7 +17,14 @@ describe('Amazon', function() {
 
         amazon.Orders.listOrders(req, function(err, result) {
             console.log('error', err);
-            console.log('result', result.body);
+            // console.log(util.inspect(result['ListOrdersResponse']['ListOrdersResult']['Orders']['Order'], true, 10));
+            console.log(result);
+            // xmlParse(result, {explicitArray: false}, function(err, result){
+            //     console.log('error', err);
+            //     // console.log('result',util.inspect(result, true, 10));
+            //
+            //
+            // });
             expect(err).toBeFalsy();
             done();
         })
