@@ -1,7 +1,8 @@
+import moment = require('moment');
 
 module Amazon {
     export interface ListOrdersRequest {
-        CreatedAfter : string;
+        CreatedAfter : moment.Moment;
         CreatedBefore? : string;
         LastUpdatedAfter? : string;
         LastUpdatedBefore? : string;
@@ -9,7 +10,7 @@ module Amazon {
         'OrderStatus.Status'? : string[];
         'FulfillmentChannel.Channel'? : string[];
         SellerOrderId? : string;
-        BuyerEmail: string;
+        BuyerEmail?: string;
         'PaymentMethod.Method'? : string[];
         'TFMShipmentStatus.Status'? : string[];
         MaxResultsPerPage? : number;
@@ -33,11 +34,12 @@ module Amazon {
 
         constructor() {
             this.sellerId = process.env.AMAZON_MERCHANT_ID;
-            this.
+            this.awsAccountId = process.env.AMAZON_ACCESS_KEY_ID;
+            this.secretKey = process.env.AMAZON_SECRET_ACCESS_KEY;
         }
 
         public listOrders(options : ListOrdersRequest, callback : (err? : any, result? : any) => void) {
-
+            
         }
     }
 }
