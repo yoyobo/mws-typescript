@@ -7,17 +7,17 @@ var xmlParse = require('xml2js').parseString;
 
 module Amazon {
     export interface ListOrdersRequest {
-        CreatedAfter: moment.Moment;
-        CreatedBefore?: string;
-        LastUpdatedAfter?: string;
-        LastUpdatedBefore?: string;
         'MarketplaceId.Id': string[];
-        'OrderStatus.Status'?: string[];
-        'FulfillmentChannel.Channel'?: string[];
+        CreatedAfter?: moment.Moment;
+        CreatedBefore?: moment.Moment;
+        LastUpdatedAfter?: moment.Moment;
+        LastUpdatedBefore?: moment.Moment;
+        'OrderStatus.Status'?: AmazonTypes.OrderStatus[];
+        'FulfillmentChannel.Channel'?: AmazonTypes.FulfillmentChannel[];
         SellerOrderId?: string;
         BuyerEmail?: string;
-        'PaymentMethod.Method'?: string[];
-        'TFMShipmentStatus.Status'?: string[];
+        'PaymentMethod.Method'?: AmazonTypes.PaymentMethod[];
+        'TFMShipmentStatus.Status'?: string[]; // could also be typed, but feature is only available in china
         MaxResultsPerPage?: number;
     }
 
@@ -260,10 +260,54 @@ module Amazon {
 
             request.addParam(new StringParameter('Action', 'ListOrders'));
             request.addParam(new StringParameter('SellerId', this.mws.credentials.sellerId));
-
-            request.addParam(new TimestampParameter('CreatedAfter', options.CreatedAfter));
-            request.addParam(new ListParameter('MarketplaceId.Id', options['MarketplaceId.Id']));
             request.addParam(new StringParameter('Version', this.version));
+
+            // Mandatory parameter
+            request.addParam(new ListParameter('MarketplaceId.Id', options['MarketplaceId.Id']));
+
+            // Optional parameters
+            if (_.has(options, 'CreatedAfter'))
+                request.addParam(new TimestampParameter('CreatedAfter', options.CreatedAfter));
+
+            if (_.has(options, 'CreatedBefore'))
+                request.addParam(new TimestampParameter('CreatedBefore', options.CreatedBefore));
+
+            if (_.has(options, 'LastUpdatedAfter'))
+                request.addParam(new TimestampParameter('LastUpdatedAfter', options.LastUpdatedAfter));
+
+            if (_.has(options, 'LastUpdatedBefore'))
+                request.addParam(new TimestampParameter('LastUpdatedBefore', options.LastUpdatedBefore));
+
+            if (_.has(options, 'OrderStatus.Status')) {
+                request.addParam(new ListParameter('OrderStatus.Status', _.map(options['OrderStatus.Status'], function(item) {
+                    return AmazonTypes.OrderStatus[item];
+                })));
+            }
+
+            if (_.has(options, 'FulfillmentChannel.Channel')) {
+                request.addParam(new ListParameter('FulfillmentChannel.Channel', _.map(options['FulfillmentChannel.Channel'], function(item) {
+                    return AmazonTypes.FulfillmentChannel[item];
+                })));
+            }
+
+            if (_.has(options, 'SellerOrderId'))
+                request.addParam(new StringParameter('SellerOrderId', options.SellerOrderId));
+
+            if (_.has(options, 'BuyerEmail'))
+                request.addParam(new StringParameter('BuyerEmail', options.BuyerEmail));
+
+            if (_.has(options, 'PaymentMethod.Method')) {
+                request.addParam(new ListParameter('PaymentMethod.Method', _.map(options['PaymentMethod.Method'], function(item) {
+                    return AmazonTypes.PaymentMethod[item];
+                })));
+            }
+
+            if(_.has(options, 'TFMShipmentStatus.Status'))
+                request.addParam(new ListParameter('TFMShipmentStatus.Status', options['TFMShipmentStatus.Status']));
+
+            if(_.has(options, 'MaxResultsPerPage'))
+                request.addParam(new StringParameter('MaxResultsPerPage', options['MaxResultsPerPage'].toString()));
+
 
             request.send(function(err, result) {
                 if (err) {
