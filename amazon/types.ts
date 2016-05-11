@@ -332,12 +332,12 @@ module AmazonTypes {
             var resultNode = rawData['RequestReportResponse']['RequestReportResult']['ReportRequestInfo'];
             this.reportRequestInfo = {
                 ReportRequestId: resultNode['ReportRequestId'],
-                ReportType: resultNode['ReportType'],
+                ReportType: ReportType['' + resultNode['ReportType']],
                 StartDate: moment(resultNode['StartDate']),
                 EndDate: moment(resultNode['EndDate']),
                 Scheduled: resultNode['Scheduled'] === 'true',
                 SubmittedDate: moment(resultNode['SubmittedDate']),
-                ReportProcessingStatus: resultNode['ReportProcessingStatus'],
+                ReportProcessingStatus: ReportProcessingStatus['' + resultNode['ReportProcessingStatus']],
             }
 
             if (_.has(resultNode, 'GeneratedReportId'))
@@ -351,18 +351,51 @@ module AmazonTypes {
         }
     }
 
+    export class GetReportRequestListResult {
+        public reportRequestInfoList: ReportRequestInfo[];
+        constructor(public rawData: any) {
+            this.reportRequestInfoList = [];
+            _.each(rawData['GetReportRequestListResponse']['GetReportRequestListResult']['ReportRequestInfo'], (item: any) => {
+                var newReportRequestInfo: ReportRequestInfo = {
+                    ReportRequestId: item['ReportRequestId'],
+                    ReportType: ReportType['' + item['ReportType']],
+                    StartDate: moment(item['StartDate']),
+                    EndDate: moment(item['EndDate']),
+                    Scheduled: item['Scheduled'] === 'true',
+                    SubmittedDate: moment(item['SubmittedDate']),
+                    ReportProcessingStatus: ReportProcessingStatus['' + item['ReportProcessingStatus']],
+                }
+
+                if (_.has(item, 'GeneratedReportId'))
+                    newReportRequestInfo['GeneratedReportId'] = item['GeneratedReportId'];
+
+                if (_.has(item, 'StartedProcessingDate'))
+                    newReportRequestInfo['StartedProcessingDate'] = moment(item['StartedProcessingDate']);
+
+                if (_.has(item, 'CompletedDate'))
+                    newReportRequestInfo['CompletedDate'] = moment(item['CompletedDate']);
+
+                this.reportRequestInfoList.push(newReportRequestInfo);
+            });
+        }
+    }
+
     export interface ReportRequestInfo {
         ReportRequestId: string,
-        ReportType: string,
+        ReportType: ReportType,
         StartDate: moment.Moment,
         EndDate: moment.Moment,
         Scheduled: boolean,
         SubmittedDate: moment.Moment,
-        ReportProcessingStatus: string,
+        ReportProcessingStatus: ReportProcessingStatus,
         GeneratedReportId?: string,
         StartedProcessingDate?: moment.Moment,
         CompletedDate?: moment.Moment
     }
+
+    export enum ReportType { _GET_FLAT_FILE_OPEN_LISTINGS_DATA_, _GET_FLAT_FILE_ORDERS_DATA_, _GET_ORDERS_DATA_, _GET_CONVERGED_FLAT_FILE_ORDER_REPORT_DATA_ };
+
+    export enum ReportProcessingStatus { _SUBMITTED_, _IN_PROGRESS_, _CANCELLED_, _DONE_, _DONE_NO_DATA_ };
 
     export enum ConditionId { New, Used, Collectible, Refurbished, Preorder, Club };
     export enum ConditionSubtypeId { New, Mint, 'Very Good', Good, Acceptable, Poor, Club, OEM, Warranty, 'Refurbished Warranty', Refurbished, 'Open Box', Any, Other }

@@ -302,10 +302,10 @@ module Amazon {
                 })));
             }
 
-            if(_.has(options, 'TFMShipmentStatus.Status'))
+            if (_.has(options, 'TFMShipmentStatus.Status'))
                 request.addParam(new ListParameter('TFMShipmentStatus.Status', options['TFMShipmentStatus.Status']));
 
-            if(_.has(options, 'MaxResultsPerPage'))
+            if (_.has(options, 'MaxResultsPerPage'))
                 request.addParam(new StringParameter('MaxResultsPerPage', options['MaxResultsPerPage'].toString()));
 
 
@@ -347,6 +347,15 @@ module Amazon {
         MarketplaceIdList?: string[]
     }
 
+    export interface GetReportRequestListRequest {
+        'ReportRequestIdList.Id'?: string[],
+        'ReportTypeList.Type'?: AmazonTypes.ReportType[],
+        'ReportProcessingStatusList.Status'?: AmazonTypes.ReportProcessingStatus[],
+        MaxCount?: number,
+        RequestedFromDate?: moment.Moment,
+        RequestedToDate?: moment.Moment
+    }
+
     export class Reports {
         private endpoint: string = '/';
         private version: string = '2009-01-01';
@@ -381,6 +390,46 @@ module Amazon {
                 }
                 else {
                     callback(null, new AmazonTypes.RequestReportResult(result));
+                }
+            });
+        }
+
+        public getReportRequestList(options: GetReportRequestListRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.GetReportRequestListResult) => void) {
+            var request: Request = new Request(this.endpoint, this.mws.credentials);
+            request.addParam(new StringParameter('Action', 'GetReportRequestList'));
+            request.addParam(new StringParameter('Merchant', this.mws.credentials.sellerId));
+            request.addParam(new StringParameter('Version', this.version));
+
+            if (_.has(options, 'ReportRequestIdList.Id'))
+                request.addParam(new ListParameter('ReportRequestIdList.Id', options['ReportRequestIdList.Id']));
+
+            if (_.has(options, 'ReportTypeList.Type')) {
+                request.addParam(new ListParameter('ReportTypeList.Type', _.map(options['ReportTypeList.Type'], function(item) {
+                    return AmazonTypes.ReportType[item];
+                })));
+            }
+
+            if (_.has(options, 'ReportProcessingStatusList.Status')) {
+                request.addParam(new ListParameter('ReportProcessingStatusList.Status', _.map(options['ReportProcessingStatusList.Status'], function(item) {
+                    return AmazonTypes.ReportProcessingStatus[item];
+                })));
+            }
+
+            if (_.has(options, 'MaxCount'))
+                request.addParam(new StringParameter('MaxCount', options.MaxCount.toString()));
+
+            if (_.has(options, 'RequestedFromDate'))
+                request.addParam(new TimestampParameter('RequestedFromDate', options.RequestedFromDate));
+
+            if (_.has(options, 'RequestedToDate'))
+                request.addParam(new TimestampParameter('RequestedToDate', options.RequestedToDate));
+
+            request.send(function(err, result) {
+                if (err) {
+                    callback(err);
+                }
+                else {
+                    callback(null, new AmazonTypes.GetReportRequestListResult(result));
                 }
             });
         }
