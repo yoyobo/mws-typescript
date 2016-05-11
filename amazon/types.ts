@@ -9,7 +9,6 @@ module AmazonTypes {
     export class ListOrdersResult {
         public orderList: Order[];
         constructor(public rawData: any) {
-            // console.log(rawData);
             this.orderList = [];
             _.each(rawData['ListOrdersResponse']['ListOrdersResult']['Orders']['Order'], (value: any) => {
                 var newOrder: Order = {
@@ -325,6 +324,44 @@ module AmazonTypes {
         ScheduledDeliveryStartDate?: moment.Moment,
         ScheduledDeliveryEndDate?: moment.Moment,
         PriceDesignation?: string
+    }
+
+    export class RequestReportResult {
+        public reportRequestInfo: ReportRequestInfo;
+        constructor(public rawData: any) {
+            var resultNode = rawData['RequestReportResponse']['RequestReportResult']['ReportRequestInfo'];
+            this.reportRequestInfo = {
+                ReportRequestId: resultNode['ReportRequestId'],
+                ReportType: resultNode['ReportType'],
+                StartDate: moment(resultNode['StartDate']),
+                EndDate: moment(resultNode['EndDate']),
+                Scheduled: resultNode['Scheduled'] === 'true',
+                SubmittedDate: moment(resultNode['SubmittedDate']),
+                ReportProcessingStatus: resultNode['ReportProcessingStatus'],
+            }
+
+            if (_.has(resultNode, 'GeneratedReportId'))
+                this.reportRequestInfo['GeneratedReportId'] = resultNode['GeneratedReportId'];
+
+            if (_.has(resultNode, 'StartedProcessingDate'))
+                this.reportRequestInfo['StartedProcessingDate'] = moment(resultNode['StartedProcessingDate']);
+
+            if (_.has(resultNode, 'CompletedDate'))
+                this.reportRequestInfo['CompletedDate'] = moment(resultNode['CompletedDate']);
+        }
+    }
+
+    export interface ReportRequestInfo {
+        ReportRequestId: string,
+        ReportType: string,
+        StartDate: moment.Moment,
+        EndDate: moment.Moment,
+        Scheduled: boolean,
+        SubmittedDate: moment.Moment,
+        ReportProcessingStatus: string,
+        GeneratedReportId?: string,
+        StartedProcessingDate?: moment.Moment,
+        CompletedDate?: moment.Moment
     }
 
     export enum ConditionId { New, Used, Collectible, Refurbished, Preorder, Club };

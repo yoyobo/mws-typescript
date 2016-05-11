@@ -112,7 +112,7 @@ module Amazon {
 
             var queryString: string = this.getQueryString();
 
-            // console.log('queryString', queryString);
+            console.log('queryString', queryString);
 
             request.post('https://' + this.credentials.host + this.endpoint + '?' + queryString, {
                 headers: {
@@ -238,10 +238,13 @@ module Amazon {
                 host: 'mws.amazonservices.de'
             };
 
-            this.Orders = new Orders(this)
+            this.Orders = new Orders(this);
+            this.Reports = new Reports(this);
         }
 
         public Orders: Orders;
+
+        public Reports: Reports;
     }
 
     export class Orders {
@@ -287,6 +290,53 @@ module Amazon {
                 }
                 else {
                     callback(null, new AmazonTypes.ListOrderItemsResult(result));
+                }
+            });
+        }
+    }
+
+    export interface RequestReportRequest {
+        ReportType: string,
+        StartDate?: moment.Moment,
+        EndDate?: moment.Moment,
+        ReportOptions?: string,
+        MarketplaceIdList?: string[]
+    }
+
+    export class Reports {
+        private endpoint: string = '/';
+        private version: string = '2009-01-01';
+
+        constructor(private mws: MWS) {
+
+        }
+
+        public requestReport(options: RequestReportRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.RequestReportResult) => void) {
+            var request: Request = new Request(this.endpoint, this.mws.credentials);
+            request.addParam(new StringParameter('Action', 'RequestReport'));
+            request.addParam(new StringParameter('Merchant', this.mws.credentials.sellerId));
+            request.addParam(new StringParameter('Version', this.version));
+
+            request.addParam(new StringParameter('ReportType', options.ReportType));
+
+            if (_.has(options, 'StartDate'))
+                request.addParam(new TimestampParameter('StartDate', options.StartDate));
+
+            if (_.has(options, 'EndDate'))
+                request.addParam(new TimestampParameter('EndDate', options.EndDate));
+
+            if (_.has(options, 'ReportOptions'))
+                request.addParam(new StringParameter('ReportOptions', options.ReportOptions));
+
+            if (_.has(options, 'MarketplaceIdList'))
+                request.addParam(new ListParameter('MarketplaceIdList.Id', options.MarketplaceIdList));
+
+            request.send(function(err, result) {
+                if (err) {
+                    callback(err);
+                }
+                else {
+                    callback(null, new AmazonTypes.RequestReportResult(result));
                 }
             });
         }

@@ -31,8 +31,22 @@ describe('Amazon', function() {
 
         amazon.Orders.listOrderItems(req, function(err, result){
             console.log('error', err);
-            console.log('first of '+result.orderItemList.length+' order items: ',result.orderItemList);
+            console.log('first of '+result.orderItemList.length+' order items: ',result.orderItemList[0]);
             // console.log('raw data:', result.rawData['ListOrderItemsResponse']['ListOrderItemsResult']['OrderItems']);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
+
+    it('can request a report.', function(done){
+        var req : Amazon.RequestReportRequest = {
+            ReportType : '_GET_FLAT_FILE_OPEN_LISTINGS_DATA_',
+            MarketplaceIdList : ['A1PA6795UKMFR9']
+        };
+
+        amazon.Reports.requestReport(req, function(err, result){
+            console.log('error', err);
+            console.log('ReportRequestResult: ',result.reportRequestInfo);
             expect(err).toBeFalsy();
             done();
         });
