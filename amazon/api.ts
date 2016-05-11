@@ -21,6 +21,10 @@ module Amazon {
         MaxResultsPerPage?: number;
     }
 
+    export interface ListOrderItemsRequest {
+        AmazonOrderId: string
+    }
+
     export interface Credentials {
         sellerId: string;
         awsAccountId: string;
@@ -108,7 +112,7 @@ module Amazon {
 
             var queryString: string = this.getQueryString();
 
-            console.log('queryString', queryString);
+            // console.log('queryString', queryString);
 
             request.post('https://' + this.credentials.host + this.endpoint + '?' + queryString, {
                 headers: {
@@ -117,13 +121,13 @@ module Amazon {
                 }
             }, function(err, httpResponse, body) {
                 if (err)
-                    callback({origin:'PostRequest', message: err, metadata: httpResponse});
+                    callback({ origin: 'PostRequest', message: err, metadata: httpResponse });
                 else {
                     xmlParse(body, { explicitArray: false }, function(err, result) {
-                        if(err){
-                            callback({origin:'XMLParsing', message: err});
-                        } else if(_.has(result, 'ErrorResponse')) {
-                            callback({origin:'MWS', message:result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error']});
+                        if (err) {
+                            callback({ origin: 'XMLParsing', message: err });
+                        } else if (_.has(result, 'ErrorResponse')) {
+                            callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
                         } else {
                             callback(null, result);
                         }
@@ -266,12 +270,26 @@ module Amazon {
                     callback(null, new AmazonTypes.ListOrdersResult(result));
                 }
             });
-
         }
 
-        // public listOrderItems(options: listOrderItemsRequest, callback: (err?: any, result?: [AmazonTypes.ListOrderItemsResult]){
-        //
-        // }
+        public listOrderItems(options: ListOrderItemsRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.ListOrderItemsResult) => void) {
+            var request: Request = new Request(this.endpoint, this.mws.credentials);
+
+            request.addParam(new StringParameter('Action', 'ListOrderItems'));
+            request.addParam(new StringParameter('SellerId', this.mws.credentials.sellerId));
+
+            request.addParam(new StringParameter('Version', this.version));
+            request.addParam(new StringParameter('AmazonOrderId', options.AmazonOrderId));
+
+            request.send(function(err, result) {
+                if (err) {
+                    callback(err);
+                }
+                else {
+                    callback(null, new AmazonTypes.ListOrderItemsResult(result));
+                }
+            });
+        }
     }
 }
 

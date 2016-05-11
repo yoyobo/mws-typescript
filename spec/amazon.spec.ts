@@ -17,16 +17,24 @@ describe('Amazon', function() {
 
         amazon.Orders.listOrders(req, function(err, result) {
             console.log('error', err);
-            // console.log(util.inspect(result['ListOrdersResponse']['ListOrdersResult']['Orders']['Order'], true, 10));
-            console.log(result);
-            // xmlParse(result, {explicitArray: false}, function(err, result){
-            //     console.log('error', err);
-            //     // console.log('result',util.inspect(result, true, 10));
-            //
-            //
-            // });
+            console.log('first of '+result.orderList.length+' orders: ',result.orderList[0]);
+            // console.log('raw', result.rawData['ListOrdersResponse']['ListOrdersResult']['Orders']['Order'][0]);
             expect(err).toBeFalsy();
             done();
-        })
-    })
+        });
+    });
+
+    it('can get order items.', function(done){
+        var req : Amazon.ListOrderItemsRequest = {
+            AmazonOrderId : '303-3209187-3328346'
+        };
+
+        amazon.Orders.listOrderItems(req, function(err, result){
+            console.log('error', err);
+            console.log('first of '+result.orderItemList.length+' order items: ',result.orderItemList);
+            // console.log('raw data:', result.rawData['ListOrderItemsResponse']['ListOrderItemsResult']['OrderItems']);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
 });

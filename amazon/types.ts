@@ -8,9 +8,10 @@ module AmazonTypes {
 
     export class ListOrdersResult {
         public orderList: Order[];
-        constructor(private rawData: [any]) {
+        constructor(public rawData: any) {
+            // console.log(rawData);
             this.orderList = [];
-            _.each(rawData, (value: any) => {
+            _.each(rawData['ListOrdersResponse']['ListOrdersResult']['Orders']['Order'], (value: any) => {
                 var newOrder: Order = {
                     AmazonOrderId: value['AmazonOrderId'],
                     PurchaseDate: moment(value['PurchaseDate']),
@@ -163,51 +164,135 @@ module AmazonTypes {
 
     export class ListOrderItemsResult {
         public orderItemList: OrderItem[];
-        constructor(private rawData: [any]){
-            _.each(rawData, (value:any) => {
+        constructor(public rawData: any) {
+            this.orderItemList = [];
+            _.each(rawData['ListOrderItemsResponse']['ListOrderItemsResult']['OrderItems'], (value: any) => {
                 var newOrderItem: OrderItem = {
                     ASIN: value['ASIN'],
                     OrderItemId: value['OrderItemId'],
-                    QuantityOrdered: parseInt(value['OrderItemId']),
+                    QuantityOrdered: parseInt(value['QuantityOrdered']),
                 };
 
-                if(_.has(value, 'SellerSKU' ))
+                if (_.has(value, 'SellerSKU'))
                     newOrderItem.SellerSKU = value['SellerSKU'];
 
-                if(_.has(value, 'Title'))
-                    newOrderItem.Title = value['SellerSKU'];
+                if (_.has(value, 'Title'))
+                    newOrderItem.Title = value['Title'];
 
-                if(_.has(value, 'QuantityShipped'))
+                if (_.has(value, 'QuantityShipped'))
                     newOrderItem.QuantityShipped = parseInt(value['QuantityShipped']);
 
-                if(_.has(value, 'PointsGranted'))
+                if (_.has(value, 'PointsGranted'))
                     newOrderItem.PointsGranted = value['PointsGranted'];
 
-                if(_.has(value, 'ItemPrice')){
-                    var ItemPrice : Money = {
-                        CurrencyCode : value['ItemPrice']['CurrencyCode'],
-                        Amount : parseFloat(value['ItemPrice']['Amount'])
+                if (_.has(value, 'ItemPrice')) {
+                    var ItemPrice: Money = {
+                        CurrencyCode: value['ItemPrice']['CurrencyCode'],
+                        Amount: parseFloat(value['ItemPrice']['Amount'])
                     }
                     newOrderItem.ItemPrice = ItemPrice;
                 }
 
-                if(_.has(value, 'ShippingPrice')){
-                    var ShippingPrice : Money = {
-                        CurrencyCode : value['ShippingPrice']['CurrencyCode'],
-                        Amount : parseFloat(value['ShippingPrice']['Amount'])
+                if (_.has(value, 'ShippingPrice')) {
+                    var ShippingPrice: Money = {
+                        CurrencyCode: value['ShippingPrice']['CurrencyCode'],
+                        Amount: parseFloat(value['ShippingPrice']['Amount'])
                     }
                     newOrderItem.ShippingPrice = ShippingPrice;
                 }
 
-                if(_.has(value, 'GiftWrapPrice')){
-                    var GiftWrapPrice : Money = {
-                        CurrencyCode : value['ItemPrice']['GiftWrapPrice'],
-                        Amount : parseFloat(value['GiftWrapPrice']['Amount'])
+                if (_.has(value, 'GiftWrapPrice')) {
+                    var GiftWrapPrice: Money = {
+                        CurrencyCode: value['GiftWrapPrice']['CurrencyCode'],
+                        Amount: parseFloat(value['GiftWrapPrice']['Amount'])
                     }
                     newOrderItem.GiftWrapPrice = GiftWrapPrice;
                 }
 
-                // CONTINUE HERE
+                if (_.has(value, 'ItemTax')) {
+                    var ItemTax: Money = {
+                        CurrencyCode: value['ItemTax']['CurrencyCode'],
+                        Amount: parseFloat(value['ItemTax']['Amount'])
+                    }
+                    newOrderItem.ItemTax = ItemTax;
+                }
+
+                if (_.has(value, 'ShippingTax')) {
+                    var ShippingTax: Money = {
+                        CurrencyCode: value['ShippingTax']['CurrencyCode'],
+                        Amount: parseFloat(value['ShippingTax']['Amount'])
+                    }
+                    newOrderItem.ShippingTax = ShippingTax;
+                }
+
+                if (_.has(value, 'GiftWrapTax')) {
+                    var GiftWrapTax: Money = {
+                        CurrencyCode: value['GiftWrapTax']['CurrencyCode'],
+                        Amount: parseFloat(value['GiftWrapTax']['Amount'])
+                    }
+                    newOrderItem.GiftWrapTax = GiftWrapTax;
+                }
+
+                if (_.has(value, 'ShippingDiscount')) {
+                    var ShippingDiscount: Money = {
+                        CurrencyCode: value['ShippingDiscount']['CurrencyCode'],
+                        Amount: parseFloat(value['ShippingDiscount']['Amount'])
+                    }
+                    newOrderItem.ShippingDiscount = ShippingDiscount;
+                }
+
+                if (_.has(value, 'PromotionDiscount')) {
+                    var PromotionDiscount: Money = {
+                        CurrencyCode: value['PromotionDiscount']['CurrencyCode'],
+                        Amount: parseFloat(value['PromotionDiscount']['Amount'])
+                    }
+                    newOrderItem.PromotionDiscount = PromotionDiscount;
+                }
+
+                if (_.has(value, 'PromotionIds'))
+                    newOrderItem.PromotionIds = value['PromotionIds'];
+
+                if (_.has(value, 'CODFee')) {
+                    var CODFee: Money = {
+                        CurrencyCode: value['CODFee']['CurrencyCode'],
+                        Amount: parseFloat(value['CODFee']['Amount'])
+                    }
+                    newOrderItem.CODFee = CODFee;
+                }
+
+                if (_.has(value, 'CODFeeDiscount')) {
+                    var CODFeeDiscount: Money = {
+                        CurrencyCode: value['CODFeeDiscount']['CurrencyCode'],
+                        Amount: parseFloat(value['CODFeeDiscount']['Amount'])
+                    }
+                    newOrderItem.CODFeeDiscount = CODFeeDiscount;
+                }
+
+                if (_.has(value, 'GiftMessageText'))
+                    newOrderItem.GiftMessageText = value['GiftMessageText'];
+
+                if (_.has(value, 'GiftWrapLevel'))
+                    newOrderItem.GiftWrapLevel = value['GiftWrapLevel'];
+
+                if (_.has(value, 'ConditionNote'))
+                    newOrderItem.ConditionNote = value['ConditionNote'];
+
+                if (_.has(value, 'ConditionId'))
+                    newOrderItem.ConditionId = ConditionId['' + value['ConditionId']];
+
+                if (_.has(value, 'ConditionSubtypeId'))
+                    newOrderItem.ConditionSubtypeId = ConditionSubtypeId['' + value['ConditionSubtypeId']];
+
+                if (_.has(value, 'ScheduledDeliveryStartDate'))
+                    newOrderItem.ScheduledDeliveryStartDate = moment(value['ScheduledDeliveryStartDate']);
+
+                if (_.has(value, 'ScheduledDeliveryEndDate'))
+                    newOrderItem.ScheduledDeliveryEndDate = moment(value['ScheduledDeliveryEndDate']);
+
+                if (_.has(value, 'PriceDesignation'))
+                    newOrderItem.PriceDesignation = value['PriceDesignation'];
+
+                this.orderItemList.push(newOrderItem);
             });
         }
     }
