@@ -6,6 +6,71 @@ module AmazonTypes {
         key: string;
     }
 
+    export interface Dictionary<T> {
+        [key: string]: T
+    }
+
+    export interface Parameter {
+        serialize(): Dictionary<string>;
+    }
+
+    export interface Credentials {
+        sellerId: string;
+        awsAccountId: string;
+        secretKey: string;
+        host: string;
+    }
+
+    export interface ListOrdersRequest {
+        'MarketplaceId.Id': string[];
+        CreatedAfter?: moment.Moment;
+        CreatedBefore?: moment.Moment;
+        LastUpdatedAfter?: moment.Moment;
+        LastUpdatedBefore?: moment.Moment;
+        'OrderStatus.Status'?: AmazonTypes.OrderStatus[];
+        'FulfillmentChannel.Channel'?: AmazonTypes.FulfillmentChannel[];
+        SellerOrderId?: string;
+        BuyerEmail?: string;
+        'PaymentMethod.Method'?: AmazonTypes.PaymentMethod[];
+        'TFMShipmentStatus.Status'?: string[]; // could also be typed, but feature is only available in china
+        MaxResultsPerPage?: number;
+    }
+
+    export interface Order {
+        AmazonOrderId: string,
+        SellerOrderId?: string,
+        PurchaseDate: moment.Moment,
+        LastUpdateDate: moment.Moment,
+        OrderStatus: OrderStatus,
+        FulfillmentChannel?: FulfillmentChannel,
+        SalesChannel?: string,
+        OrderChannel?: string,
+        ShipServiceLevel?: string,
+        ShippingAddress?: Address,
+        BillingAddress?: Address,
+        OrderTotal?: Money,
+        NumberOfItemsShipped?: number,
+        NumberOfItemsUnshipped?: number,
+        PaymentExecutionDetail?: any,
+        PaymentMethod?: PaymentMethod,
+        MarketplaceId: MarketplaceId,
+        BuyerEmail?: string,
+        BuyerName?: string,
+        IsBusinessOrder?: boolean
+        PurchaseOrderNumber?: string,
+        ShipmentServiceLevelCategory?: ShipmentServiceLevelCategory,
+        ShippedByAmazonTFM?: boolean,
+        TFMShipmentStatus?: string,
+        CbaDisplayableShippingLabel?: string,
+        OrderType: OrderType,
+        EarliestShipDate?: moment.Moment
+        LatestShipDate?: moment.Moment,
+        EarliestDeliveryDate?: moment.Moment,
+        LatestDeliveryDate?: moment.Moment,
+        IsPrime?: boolean,
+        IsPremiumOrder?: boolean,
+    }
+
     export class ListOrdersResult {
         public orderList: Order[];
         constructor(public rawData: any) {
@@ -125,41 +190,39 @@ module AmazonTypes {
         }
     }
 
-    export interface Order {
-        AmazonOrderId: string,
-        SellerOrderId?: string,
-        PurchaseDate: moment.Moment,
-        LastUpdateDate: moment.Moment,
-        OrderStatus: OrderStatus,
-        FulfillmentChannel?: FulfillmentChannel,
-        SalesChannel?: string,
-        OrderChannel?: string,
-        ShipServiceLevel?: string,
-        ShippingAddress?: Address,
-        BillingAddress?: Address,
-        OrderTotal?: Money,
-        NumberOfItemsShipped?: number,
-        NumberOfItemsUnshipped?: number,
-        PaymentExecutionDetail?: any,
-        PaymentMethod?: PaymentMethod,
-        MarketplaceId: MarketplaceId,
-        BuyerEmail?: string,
-        BuyerName?: string,
-        IsBusinessOrder?: boolean
-        PurchaseOrderNumber?: string,
-        ShipmentServiceLevelCategory?: ShipmentServiceLevelCategory,
-        ShippedByAmazonTFM?: boolean,
-        TFMShipmentStatus?: string,
-        CbaDisplayableShippingLabel?: string,
-        OrderType: OrderType,
-        EarliestShipDate?: moment.Moment
-        LatestShipDate?: moment.Moment,
-        EarliestDeliveryDate?: moment.Moment,
-        LatestDeliveryDate?: moment.Moment,
-        IsPrime?: boolean,
-        IsPremiumOrder?: boolean,
+    export interface ListOrderItemsRequest {
+        AmazonOrderId: string
     }
 
+    export interface OrderItem {
+        ASIN: string,
+        SellerSKU?: string,
+        OrderItemId: string,
+        Title?: string,
+        QuantityOrdered: number,
+        QuantityShipped?: number,
+        PointsGranted?: any,
+        ItemPrice?: Money,
+        ShippingPrice?: Money,
+        GiftWrapPrice?: Money,
+        ItemTax?: Money,
+        ShippingTax?: Money,
+        GiftWrapTax?: Money,
+        ShippingDiscount?: Money,
+        PromotionDiscount?: Money,
+        PromotionIds?: any,
+        CODFee?: Money,
+        CODFeeDiscount?: Money,
+        GiftMessageText?: string,
+        GiftWrapLevel?: string,
+        InvoiceData?: any,
+        ConditionNote?: string,
+        ConditionId?: ConditionId,
+        ConditionSubtypeId?: ConditionSubtypeId,
+        ScheduledDeliveryStartDate?: moment.Moment,
+        ScheduledDeliveryEndDate?: moment.Moment,
+        PriceDesignation?: string
+    }
 
     export class ListOrderItemsResult {
         public orderItemList: OrderItem[];
@@ -296,34 +359,75 @@ module AmazonTypes {
         }
     }
 
-    export interface OrderItem {
-        ASIN: string,
-        SellerSKU?: string,
-        OrderItemId: string,
-        Title?: string,
-        QuantityOrdered: number,
-        QuantityShipped?: number,
-        PointsGranted?: any,
-        ItemPrice?: Money,
-        ShippingPrice?: Money,
-        GiftWrapPrice?: Money,
-        ItemTax?: Money,
-        ShippingTax?: Money,
-        GiftWrapTax?: Money,
-        ShippingDiscount?: Money,
-        PromotionDiscount?: Money,
-        PromotionIds?: any,
-        CODFee?: Money,
-        CODFeeDiscount?: Money,
-        GiftMessageText?: string,
-        GiftWrapLevel?: string,
-        InvoiceData?: any,
-        ConditionNote?: string,
-        ConditionId?: ConditionId,
-        ConditionSubtypeId?: ConditionSubtypeId,
-        ScheduledDeliveryStartDate?: moment.Moment,
-        ScheduledDeliveryEndDate?: moment.Moment,
-        PriceDesignation?: string
+    export class StringParameter implements AmazonTypes.Parameter {
+        constructor(private key: string, private value: string) {
+        }
+
+        serialize(): AmazonTypes.Dictionary<string> {
+            var result: AmazonTypes.Dictionary<string> = {};
+            result[this.key] = this.value;
+            return result;
+        }
+    }
+
+    export class TimestampParameter implements AmazonTypes.Parameter {
+        constructor(private key: string, private value: moment.Moment) {
+        }
+
+        serialize(): AmazonTypes.Dictionary<string> {
+            var result: AmazonTypes.Dictionary<string> = {};
+            result[this.key] = this.value.toISOString();
+            return result;
+        }
+    }
+
+    export class ListParameter implements AmazonTypes.Parameter {
+        private values: string[];
+        constructor(private key: string, values?: string[]) {
+            this.values = values || [];
+        }
+
+        public push(value: string) {
+            this.values.push(value);
+        }
+
+        public serialize(): AmazonTypes.Dictionary<string> {
+            var result: AmazonTypes.Dictionary<string> = {};
+
+            var count = 0;
+            _.each(this.values, (value: string) => {
+                result[this.key + '.' + ++count] = value;
+            });
+
+            return result;
+        }
+    }
+
+    export interface ResultCallback {
+        (err: AmazonTypes.Error, result?: any): void;
+    }
+
+
+
+    export interface RequestReportRequest {
+        ReportType: string,
+        StartDate?: moment.Moment,
+        EndDate?: moment.Moment,
+        ReportOptions?: string,
+        MarketplaceIdList?: string[]
+    }
+
+    export interface ReportRequestInfo {
+        ReportRequestId: string,
+        ReportType: ReportType,
+        StartDate: moment.Moment,
+        EndDate: moment.Moment,
+        Scheduled: boolean,
+        SubmittedDate: moment.Moment,
+        ReportProcessingStatus: ReportProcessingStatus,
+        GeneratedReportId?: string,
+        StartedProcessingDate?: moment.Moment,
+        CompletedDate?: moment.Moment
     }
 
     export class RequestReportResult {
@@ -349,6 +453,16 @@ module AmazonTypes {
             if (_.has(resultNode, 'CompletedDate'))
                 this.reportRequestInfo['CompletedDate'] = moment(resultNode['CompletedDate']);
         }
+    }
+
+
+    export interface GetReportRequestListRequest {
+        'ReportRequestIdList.Id'?: string[],
+        'ReportTypeList.Type'?: AmazonTypes.ReportType[],
+        'ReportProcessingStatusList.Status'?: AmazonTypes.ReportProcessingStatus[],
+        MaxCount?: number,
+        RequestedFromDate?: moment.Moment,
+        RequestedToDate?: moment.Moment
     }
 
     export class GetReportRequestListResult {
@@ -380,37 +494,6 @@ module AmazonTypes {
         }
     }
 
-    export interface ReportRequestInfo {
-        ReportRequestId: string,
-        ReportType: ReportType,
-        StartDate: moment.Moment,
-        EndDate: moment.Moment,
-        Scheduled: boolean,
-        SubmittedDate: moment.Moment,
-        ReportProcessingStatus: ReportProcessingStatus,
-        GeneratedReportId?: string,
-        StartedProcessingDate?: moment.Moment,
-        CompletedDate?: moment.Moment
-    }
-
-    export enum ReportType { _GET_FLAT_FILE_OPEN_LISTINGS_DATA_, _GET_FLAT_FILE_ORDERS_DATA_, _GET_ORDERS_DATA_, _GET_CONVERGED_FLAT_FILE_ORDER_REPORT_DATA_ };
-
-    export enum ReportProcessingStatus { _SUBMITTED_, _IN_PROGRESS_, _CANCELLED_, _DONE_, _DONE_NO_DATA_ };
-
-    export enum ConditionId { New, Used, Collectible, Refurbished, Preorder, Club };
-    export enum ConditionSubtypeId { New, Mint, 'Very Good', Good, Acceptable, Poor, Club, OEM, Warranty, 'Refurbished Warranty', Refurbished, 'Open Box', Any, Other }
-    export enum OrderStatus { Pending, Unshipped, PartiallyShipped, Shipped };
-
-    export enum FulfillmentChannel { AFN, MFN };
-
-    export enum PaymentMethod { COD, CVS, Other };
-
-    export enum MarketplaceId { A1PA6795UKMFR9, A1RKKUPIHCS9HS, A13V1IB3VIYZZH, A21TJRUUN4KGV, APJ6JRA9NG5V4, A1F83G8C2ARO7P }
-
-    export interface Dictionary<T> {
-        [key: string]: T
-    }
-
     export var MarketplaceIdDic: Dictionary<string> = {
         'A1PA6795UKMFR9': 'DE',
         'A1RKKUPIHCS9HS': 'ES',
@@ -419,6 +502,22 @@ module AmazonTypes {
         'APJ6JRA9NG5V4': 'IT',
         'A1F83G8C2ARO7P': 'UK'
     };
+
+    export enum ReportType { _GET_FLAT_FILE_OPEN_LISTINGS_DATA_, _GET_FLAT_FILE_ORDERS_DATA_, _GET_ORDERS_DATA_, _GET_CONVERGED_FLAT_FILE_ORDER_REPORT_DATA_ };
+
+    export enum ReportProcessingStatus { _SUBMITTED_, _IN_PROGRESS_, _CANCELLED_, _DONE_, _DONE_NO_DATA_ };
+
+    export enum ConditionId { New, Used, Collectible, Refurbished, Preorder, Club };
+
+    export enum ConditionSubtypeId { New, Mint, 'Very Good', Good, Acceptable, Poor, Club, OEM, Warranty, 'Refurbished Warranty', Refurbished, 'Open Box', Any, Other }
+
+    export enum OrderStatus { Pending, Unshipped, PartiallyShipped, Shipped };
+
+    export enum FulfillmentChannel { AFN, MFN };
+
+    export enum PaymentMethod { COD, CVS, Other };
+
+    export enum MarketplaceId { A1PA6795UKMFR9, A1RKKUPIHCS9HS, A13V1IB3VIYZZH, A21TJRUUN4KGV, APJ6JRA9NG5V4, A1F83G8C2ARO7P }
 
     export enum ShipmentServiceLevelCategory { Expedited, FreeEconomy, NextDay, SameDay, SecondDay, Scheduled, Standard };
 
@@ -442,8 +541,6 @@ module AmazonTypes {
         CurrencyCode: string,
         Amount: number
     };
-
-
 
     export interface Error {
         origin: string;

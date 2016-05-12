@@ -11,7 +11,7 @@ describe('Amazon', function() {
     var amazon: Amazon.MWS = new Amazon.MWS();
 
     it('can list orders.', function(done) {
-        var req: Amazon.ListOrdersRequest = {
+        var req: AmazonTypes.ListOrdersRequest = {
             CreatedAfter: moment().subtract(24, 'hours'),
             'MarketplaceId.Id': ['A1PA6795UKMFR9'],
             'OrderStatus.Status': [AmazonTypes.OrderStatus.Shipped],
@@ -27,7 +27,7 @@ describe('Amazon', function() {
     });
 
     it('can get order items.', function(done) {
-        var req: Amazon.ListOrderItemsRequest = {
+        var req: AmazonTypes.ListOrderItemsRequest = {
             AmazonOrderId: '303-3209187-3328346'
         };
 
@@ -41,7 +41,7 @@ describe('Amazon', function() {
     });
 
     it('can request a report.', function(done) {
-        var req: Amazon.RequestReportRequest = {
+        var req: AmazonTypes.RequestReportRequest = {
             ReportType: '_GET_FLAT_FILE_OPEN_LISTINGS_DATA_',
             MarketplaceIdList: ['A1PA6795UKMFR9']
         };
@@ -55,13 +55,13 @@ describe('Amazon', function() {
     });
 
     it('can get report request list.', function(done) {
-        var req: Amazon.GetReportRequestListRequest = {
-            'ReportTypeList.Type': [AmazonTypes.ReportType._GET_ORDERS_DATA_]
+        var req: AmazonTypes.GetReportRequestListRequest = {
+            'ReportTypeList.Type': [AmazonTypes.ReportType._GET_FLAT_FILE_OPEN_LISTINGS_DATA_]
         };
 
         amazon.Reports.getReportRequestList(req, function(err, result) {
             console.log('error', err);
-            console.log('First from GetReportRequestListResult: ', result.reportRequestInfoList[0]);
+            console.log('First of ' + result.reportRequestInfoList.length + ' GetReportRequestListResult: ', result.reportRequestInfoList[0]);
             expect(err).toBeFalsy();
             done();
         });
