@@ -6,6 +6,7 @@ import util = require('util');
 var xmlParse = require('xml2js').parseString;
 import AmazonTypes = require('../amazon/types');
 import fs = require('fs');
+import _ = require('underscore');
 
 describe('Amazon', function() {
 
@@ -106,6 +107,20 @@ describe('Amazon', function() {
         amazon.Feeds.getFeedSubmissionList(req, function(err, result) {
             console.log('error', err);
             console.log('First of ' + result.feedSubmissionList.length + ' feed submission results:', result.feedSubmissionList[0]);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
+
+    it('can get a feed submission result', function(done) {
+        var req: AmazonTypes.GetFeedSubmissionResultRequest = {
+            // FeedSubmissionId : '104146016933'
+            FeedSubmissionId: '104139016933'
+        };
+
+        amazon.Feeds.getFeedSubmissionResult(req, function(err, result) {
+            console.log('error', err);
+            console.log('result (possibly truncated):', _.isString(result) ? result.substring(0, 500) : result);
             expect(err).toBeFalsy();
             done();
         });

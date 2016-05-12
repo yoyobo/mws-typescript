@@ -78,4 +78,21 @@ export class Feeds {
         });
 
     }
+
+    public getFeedSubmissionResult(options: AmazonTypes.GetFeedSubmissionResultRequest, callback: (err?: AmazonTypes.Error, result?: string) => void) {
+        var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
+        request.addParam(new AmazonTypes.StringParameter('Action', 'GetFeedSubmissionResult'));
+        request.addParam(new AmazonTypes.StringParameter('Merchant', this.credentials.sellerId));
+        request.addParam(new AmazonTypes.StringParameter('Version', this.version));
+
+        request.addParam(new AmazonTypes.StringParameter('FeedSubmissionId', options.FeedSubmissionId));
+
+        request.send(function(err, result) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, result);
+            }
+        });
+    }
 }

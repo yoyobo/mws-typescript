@@ -26,7 +26,7 @@ module Amazon {
 
         public Reports: Reports.Reports;
 
-        public Feeds : Feeds.Feeds;
+        public Feeds: Feeds.Feeds;
     }
 }
 

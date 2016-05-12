@@ -571,6 +571,10 @@ module AmazonTypes {
         SubmittedToDate?: moment.Moment
     }
 
+    export interface GetFeedSubmissionResultRequest {
+        FeedSubmissionId: string
+    }
+
     export enum FeedProcessingStatus { _AWAITING_ASYNCHRONOUS_REPLY_, _CANCELLED_, _DONE_, _IN_PROGRESS_, _IN_SAFETY_NET_, _SUBMITTED_, _UNCONFIRMED_ };
     export enum FeedContentType { 'text/tab-separated-values; charset=iso-8859-1', 'text/xml' };
 
