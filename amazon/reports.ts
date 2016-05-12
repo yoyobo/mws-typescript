@@ -28,8 +28,11 @@ export class Reports {
         if (_.has(options, 'ReportOptions'))
             request.addParam(new AmazonTypes.StringParameter('ReportOptions', options.ReportOptions));
 
-        if (_.has(options, 'MarketplaceIdList'))
-            request.addParam(new AmazonTypes.ListParameter('MarketplaceIdList.Id', options.MarketplaceIdList));
+        if (_.has(options, 'MarketplaceIdList.Id')) {
+            request.addParam(new AmazonTypes.ListParameter('MarketplaceIdList.Id', _.map(options['MarketplaceIdList.Id'], function(item) {
+                return AmazonTypes.MarketplaceId[item];
+            })));
+        }
 
         request.send(function(err, result) {
             if (err) {

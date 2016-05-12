@@ -19,7 +19,11 @@ export class Orders {
         request.addParam(new AmazonTypes.StringParameter('Version', this.version));
 
         // Mandatory parameter
-        request.addParam(new AmazonTypes.ListParameter('MarketplaceId.Id', options['MarketplaceId.Id']));
+        if (_.has(options, 'MarketplaceId.Id')) {
+            request.addParam(new AmazonTypes.ListParameter('MarketplaceId.Id', _.map(options['MarketplaceId.Id'], function(item) {
+                return AmazonTypes.MarketplaceId[item];
+            })));
+        }
 
         // Optional parameters
         if (_.has(options, 'CreatedAfter'))
@@ -63,7 +67,6 @@ export class Orders {
 
         if (_.has(options, 'MaxResultsPerPage'))
             request.addParam(new AmazonTypes.StringParameter('MaxResultsPerPage', options['MaxResultsPerPage'].toString()));
-
 
         request.send(function(err, result) {
             if (err) {

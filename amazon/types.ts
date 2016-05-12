@@ -22,7 +22,7 @@ module AmazonTypes {
     }
 
     export interface ListOrdersRequest {
-        'MarketplaceId.Id': string[];
+        'MarketplaceId.Id': MarketplaceId[];
         CreatedAfter?: moment.Moment;
         CreatedBefore?: moment.Moment;
         LastUpdatedAfter?: moment.Moment;
@@ -370,6 +370,17 @@ module AmazonTypes {
         }
     }
 
+    export class BooleanParameter implements AmazonTypes.Parameter {
+        constructor(private key: string, private value: boolean) {
+        }
+
+        serialize(): AmazonTypes.Dictionary<string> {
+            var result: AmazonTypes.Dictionary<string> = {};
+            result[this.key] = this.value.toString();
+            return result;
+        }
+    }
+
     export class TimestampParameter implements AmazonTypes.Parameter {
         constructor(private key: string, private value: moment.Moment) {
         }
@@ -407,14 +418,12 @@ module AmazonTypes {
         (err: AmazonTypes.Error, result?: any): void;
     }
 
-
-
     export interface RequestReportRequest {
         ReportType: string,
         StartDate?: moment.Moment,
         EndDate?: moment.Moment,
         ReportOptions?: string,
-        MarketplaceIdList?: string[]
+        'MarketplaceIdList.Id'?: MarketplaceId[]
     }
 
     export interface ReportRequestInfo {
@@ -495,9 +504,77 @@ module AmazonTypes {
     }
 
     export interface GetReportRequest {
-        ReportId : string
+        ReportId: string
     }
 
+    export interface BodyData {
+        data: string,
+        'content-type': FeedContentType,
+    }
+
+    export interface SubmitFeedRequest {
+        FeedType: FeedType,
+        'MarketplaceIdList.Id'?: MarketplaceId[],
+        PurgeAndReplace?: boolean
+    }
+
+    export interface FeedSubmissionInfo {
+        FeedSubmissionId: string,
+        FeedType: FeedType,
+        SubmittedDate: moment.Moment,
+        FeedProcessingStatus: FeedProcessingStatus,
+        StartedProcessingDate: moment.Moment,
+        CompletedProcessingDate: moment.Moment
+    }
+
+    export class FeedSubmissionResult {
+        public feedSubmissionData: FeedSubmissionInfo;
+        constructor(public rawData: any) {
+            var resultNode = rawData['SubmitFeedResponse']['SubmitFeedResult']['FeedSubmissionInfo'];
+
+            this.feedSubmissionData = {
+                FeedSubmissionId: resultNode['FeedSubmissionId'],
+                FeedType: FeedType['' + resultNode['FeedType']],
+                SubmittedDate: moment(resultNode['SubmittedDate']),
+                FeedProcessingStatus: FeedProcessingStatus['' + resultNode['FeedProcessingStatus']],
+                StartedProcessingDate: moment(resultNode['SubmittedDate']),
+                CompletedProcessingDate: moment(resultNode['CompletedProcessingDate'])
+            };
+        }
+    }
+
+    export class GetFeedSubmissionListResult {
+        public feedSubmissionList: FeedSubmissionInfo[];
+        constructor(public rawData: any) {
+            this.feedSubmissionList = [];
+            _.each(rawData['GetFeedSubmissionListResponse']['GetFeedSubmissionListResult']['FeedSubmissionInfo'], (item: any) => {
+                var newSubmissionInfo: FeedSubmissionInfo = {
+                    FeedSubmissionId: item['FeedSubmissionId'],
+                    FeedType: FeedType['' + item['FeedType']],
+                    SubmittedDate: moment(item['SubmittedDate']),
+                    FeedProcessingStatus: FeedProcessingStatus['' + item['FeedProcessingStatus']],
+                    StartedProcessingDate: moment(item['SubmittedDate']),
+                    CompletedProcessingDate: moment(item['CompletedProcessingDate'])
+                };
+
+                this.feedSubmissionList.push(newSubmissionInfo);
+            });
+        }
+    }
+
+    export interface GetFeedSubmissionListRequest {
+        'FeedSubmissionIdList.Id'?: string[],
+        MaxCount?: number,
+        'FeedTypeList.Type'?: FeedType[],
+        'FeedProcessingStatusList.Status'?: FeedProcessingStatus[],
+        SubmittedFromDate?: moment.Moment,
+        SubmittedToDate?: moment.Moment
+    }
+
+    export enum FeedProcessingStatus { _AWAITING_ASYNCHRONOUS_REPLY_, _CANCELLED_, _DONE_, _IN_PROGRESS_, _IN_SAFETY_NET_, _SUBMITTED_, _UNCONFIRMED_ };
+    export enum FeedContentType { 'text/tab-separated-values; charset=iso-8859-1', 'text/xml' };
+
+    export enum FeedType { '_POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA_', '_POST_ORDER_FULFILLMENT_DATA_' };
     export var MarketplaceIdDic: Dictionary<string> = {
         'A1PA6795UKMFR9': 'DE',
         'A1RKKUPIHCS9HS': 'ES',

@@ -5,6 +5,7 @@ import Amazon = require('../amazon/api');
 import util = require('util');
 var xmlParse = require('xml2js').parseString;
 import AmazonTypes = require('../amazon/types');
+import fs = require('fs');
 
 describe('Amazon', function() {
 
@@ -13,14 +14,13 @@ describe('Amazon', function() {
     it('can list orders.', function(done) {
         var req: AmazonTypes.ListOrdersRequest = {
             CreatedAfter: moment().subtract(24, 'hours'),
-            'MarketplaceId.Id': ['A1PA6795UKMFR9'],
+            'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
             'OrderStatus.Status': [AmazonTypes.OrderStatus.Shipped],
         };
 
         amazon.Orders.listOrders(req, function(err, result) {
             console.log('error', err);
             console.log('first of ' + result.orderList.length + ' orders: ', result.orderList[0]);
-            // console.log('raw', result.rawData['ListOrdersResponse']['ListOrdersResult']['Orders']['Order'][0]);
             expect(err).toBeFalsy();
             done();
         });
@@ -34,7 +34,6 @@ describe('Amazon', function() {
         amazon.Orders.listOrderItems(req, function(err, result) {
             console.log('error', err);
             console.log('first of ' + result.orderItemList.length + ' order items: ', result.orderItemList[0]);
-            // console.log('raw data:', result.rawData['ListOrderItemsResponse']['ListOrderItemsResult']['OrderItems']);
             expect(err).toBeFalsy();
             done();
         });
@@ -43,7 +42,7 @@ describe('Amazon', function() {
     it('can request a report.', function(done) {
         var req: AmazonTypes.RequestReportRequest = {
             ReportType: '_GET_FLAT_FILE_OPEN_LISTINGS_DATA_',
-            MarketplaceIdList: ['A1PA6795UKMFR9']
+            'MarketplaceIdList.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9]
         };
 
         amazon.Reports.requestReport(req, function(err, result) {
@@ -56,7 +55,7 @@ describe('Amazon', function() {
 
     it('can get report request list.', function(done) {
         var req: AmazonTypes.GetReportRequestListRequest = {
-            'ReportTypeList.Type': [AmazonTypes.ReportType._GET_FLAT_FILE_OPEN_LISTINGS_DATA_]
+            'ReportTypeList.Type': [AmazonTypes.ReportType._GET_FLAT_FILE_OPEN_LISTINGS_DATA_, AmazonTypes.ReportType._GET_FLAT_FILE_ORDERS_DATA_]
         };
 
         amazon.Reports.getReportRequestList(req, function(err, result) {
@@ -80,4 +79,37 @@ describe('Amazon', function() {
         })
 
     });
+
+    it('can submit a feed', function(done) {
+        var req: AmazonTypes.SubmitFeedRequest = {
+            FeedType: AmazonTypes.FeedType._POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA_
+        };
+
+        var body: AmazonTypes.BodyData = {
+            data: fs.readFileSync(__dirname + '/../../testfeed_de.txt', 'utf-8'), // only for testing, content should have right encoding later
+            'content-type': AmazonTypes.FeedContentType['text/tab-separated-values; charset=iso-8859-1']
+        };
+
+        amazon.Feeds.submitFeed(req, body, function(err, result) {
+            console.log('error', err);
+            console.log('FeedSubmissionResult: ', result.feedSubmissionData);
+            expect(err).toBeFalsy();
+            done();
+        });
+    })
+
+    it('can get a feed submission list', function(done) {
+        var req: AmazonTypes.GetFeedSubmissionListRequest = {
+            'FeedSubmissionIdList.Id': ['104136016933', '104134016933']
+        };
+
+        amazon.Feeds.getFeedSubmissionList(req, function(err, result) {
+            console.log('error', err);
+            console.log('First of ' + result.feedSubmissionList.length + ' feed submission results:', result.feedSubmissionList[0]);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
+
+
 });

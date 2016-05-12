@@ -3,11 +3,13 @@ import moment = require('moment');
 import request = require('request');
 var xmlParse = require('xml2js').parseString;
 import crypto = require('crypto');
+var utf8 = require('utf8');
 
 import AmazonTypes = require('./types');
 
 export class Request {
     private parameters: AmazonTypes.Parameter[];
+    private body: AmazonTypes.BodyData;
 
     constructor(private endpoint: string, private credentials: AmazonTypes.Credentials) {
         this.parameters = [];
@@ -21,29 +23,49 @@ export class Request {
         this.parameters.push(param);
     }
 
+    public setBody(body: AmazonTypes.BodyData) {
+        this.body = body;
+    }
+
     public send(callback: AmazonTypes.ResultCallback) {
         var signature: string = this.getSignature();
         this.addParam(new AmazonTypes.StringParameter('Signature', signature));
 
         var userAgent: string = 'pptest/1.0 (Language=Javascript)';
-        var contentType: string = 'text/xml';
+        var contentType: string = this.body ? AmazonTypes.FeedContentType[this.body['content-type']] : 'text/xml';
 
         var queryString: string = this.getQueryString();
 
         console.log('queryString', queryString);
 
-        request.post('https://' + this.credentials.host + this.endpoint + '?' + queryString, {
+        var requestOptions = {
             headers: {
                 'x-amazon-user-agent': userAgent,
                 'Content-Type': contentType
             }
-        }, function(err, httpResponse, body) {
+        };
+
+        if (this.body){
+            requestOptions['body'] = this.body.data;
+            requestOptions.headers['content-md5'] = this.hexStrToBase64(this.hex_md5(this.body.data));
+        }
+
+
+        request.post('https://' + this.credentials.host + this.endpoint + '?' + queryString, requestOptions, (err, httpResponse, body) => {
             if (err)
                 callback({ origin: 'PostRequest', message: err, metadata: httpResponse });
             else {
                 // Detect non xml content and return without parsing
-                if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'] == 'text/plain;charset=Cp1252') {
-                    callback(null, body);
+                if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'].match(/^text\/plain/)) {
+                    if (_.has(httpResponse.headers, 'content-md5')) {
+                        var calcResMd5 = this.hexStrToBase64(this.hex_md5(body));
+                        if (calcResMd5 !== httpResponse.headers['content-md5'])
+                            callback({ origin: 'MD5-Comparison', message: 'MD5-Mismatch', metadata: { 'computedMd5FromResponse': calcResMd5, 'md5FromResponseHeader': httpResponse.headers['content-md5'] } });
+                        else
+                            callback(null, body);
+                    } else {
+                        callback(null, body);
+                    }
                 }
                 else {
                     // Expect content to be xml (content-type is not specified in every case)
@@ -150,5 +172,12 @@ export class Request {
         }
 
         return output;
+    }
+
+    private hex_md5(s) {
+        var utf8String = utf8.encode(s);
+        var md5Hash = crypto.createHash('md5');
+        md5Hash.update(utf8String);
+        return md5Hash.digest('hex');
     }
 }
