@@ -41,15 +41,22 @@ export class Request {
             if (err)
                 callback({ origin: 'PostRequest', message: err, metadata: httpResponse });
             else {
-                xmlParse(body, { explicitArray: false }, function(err, result) {
-                    if (err) {
-                        callback({ origin: 'XMLParsing', message: err });
-                    } else if (_.has(result, 'ErrorResponse')) {
-                        callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
-                    } else {
-                        callback(null, result);
-                    }
-                });
+                // Detect non xml content and return without parsing
+                if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'] == 'text/plain;charset=Cp1252') {
+                    callback(null, body);
+                }
+                else {
+                    // Expect content to be xml (content-type is not specified in every case)
+                    xmlParse(body, { explicitArray: false }, function(err, result) {
+                        if (err) {
+                            callback({ origin: 'XMLParsing', message: err });
+                        } else if (_.has(result, 'ErrorResponse')) {
+                            callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
+                        } else {
+                            callback(null, result);
+                        }
+                    });
+                }
             }
         });
     }

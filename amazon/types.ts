@@ -494,6 +494,10 @@ module AmazonTypes {
         }
     }
 
+    export interface GetReportRequest {
+        ReportId : string
+    }
+
     export var MarketplaceIdDic: Dictionary<string> = {
         'A1PA6795UKMFR9': 'DE',
         'A1RKKUPIHCS9HS': 'ES',

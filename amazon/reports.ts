@@ -80,4 +80,21 @@ export class Reports {
             }
         });
     }
+
+    public getReport(options: AmazonTypes.GetReportRequest, callback: (err?: AmazonTypes.Error, result?: string) => void) {
+        var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
+        request.addParam(new AmazonTypes.StringParameter('Action', 'GetReport'));
+        request.addParam(new AmazonTypes.StringParameter('Merchant', this.credentials.sellerId));
+        request.addParam(new AmazonTypes.StringParameter('Version', this.version));
+
+        request.addParam(new AmazonTypes.StringParameter('ReportId', options.ReportId));
+
+        request.send(function(err, result) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, result);
+            }
+        });
+    }
 }

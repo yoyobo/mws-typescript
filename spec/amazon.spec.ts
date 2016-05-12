@@ -66,4 +66,18 @@ describe('Amazon', function() {
             done();
         });
     });
+
+    it('can get a report.', function(done) {
+        var req: AmazonTypes.GetReportRequest = {
+            ReportId: '2273836229016933'
+        };
+
+        amazon.Reports.getReport(req, function(err, result) {
+            console.log('error', err);
+            console.log('First 200 chars of result:', result.substring(0, 200));
+            expect(err).toBeFalsy();
+            done();
+        })
+
+    });
 });
