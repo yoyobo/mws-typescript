@@ -125,6 +125,4 @@ describe('Amazon', function() {
             done();
         });
     });
-
-
 });
