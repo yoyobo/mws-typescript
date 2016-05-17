@@ -27,6 +27,7 @@ export class Request {
         this.body = body;
     }
 
+    // send the request to amazon
     public send(callback: AmazonTypes.ResultCallback) {
         var signature: string = this.getSignature();
         this.addParam(new AmazonTypes.StringParameter('Signature', signature));
@@ -45,7 +46,8 @@ export class Request {
             }
         };
 
-        if (this.body){
+        // Handle body data
+        if (this.body) {
             requestOptions['body'] = this.body.data;
             requestOptions.headers['content-md5'] = this.hexStrToBase64(this.hex_md5(this.body.data));
         }
@@ -59,11 +61,16 @@ export class Request {
                 if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'].match(/^text\/plain/)) {
                     if (_.has(httpResponse.headers, 'content-md5')) {
                         var calcResMd5 = this.hexStrToBase64(this.hex_md5(body));
-                        if (calcResMd5 !== httpResponse.headers['content-md5'])
+                        if (calcResMd5 !== httpResponse.headers['content-md5']) {
+                            // Catch md5 mismatch error
                             callback({ origin: 'MD5-Comparison', message: 'MD5-Mismatch', metadata: { 'computedMd5FromResponse': calcResMd5, 'md5FromResponseHeader': httpResponse.headers['content-md5'] } });
-                        else
+                        }
+                        else {
+                            // Return raw result
                             callback(null, body);
+                        }
                     } else {
+                        // Return raw result
                         callback(null, body);
                     }
                 }
@@ -71,10 +78,13 @@ export class Request {
                     // Expect content to be xml (content-type is not specified in every case)
                     xmlParse(body, { explicitArray: false }, function(err, result) {
                         if (err) {
+                            // Catch error at XML parsing
                             callback({ origin: 'XMLParsing', message: err });
                         } else if (_.has(result, 'ErrorResponse')) {
+                            // Catch error returned from API
                             callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
                         } else {
+                            // Return parsed result
                             callback(null, result);
                         }
                     });
@@ -83,6 +93,7 @@ export class Request {
         });
     }
 
+    // Compute signature for set parameters
     private getSignature(): string {
         let strToSign: string = this.getStringToSign(this.endpoint);
         let hmac: string = crypto.createHmac('sha256', this.credentials.secretKey).update(strToSign).digest('hex');
@@ -98,6 +109,7 @@ export class Request {
         return b64hmac;
     }
 
+    // Build http query string from parameters
     private getQueryString(): string {
         var input: AmazonTypes.Dictionary<string> = {};
 
@@ -114,14 +126,17 @@ export class Request {
         return queryArray.join('&');
     }
 
+    // Build string to be signed for API call
     private getStringToSign(endpoint: string): string {
         var input = {};
 
+        // Get all values from parameters
         _.each(this.parameters, function(param: AmazonTypes.Parameter) {
             var serialized: AmazonTypes.Dictionary<string> = param.serialize();
             _.extend(input, serialized);
         });
 
+        // Sort list
         var keys = _.keys(input).sort();
 
         var str = '';
@@ -133,9 +148,11 @@ export class Request {
             str += keys[i] + '=' + this.urlEncode(input[keys[i]]);
         }
 
+        // Join output string
         return ['POST', this.credentials.host, endpoint, str].join('\n');
     }
 
+    // Custom url encoding taken from scratchpad
     private urlEncode(input: string): string {
         input = encodeURIComponent(input);
         input = input.replace(/\*/g, '%2A');
@@ -146,6 +163,7 @@ export class Request {
         return input;
     }
 
+    // convert hex string to base64 encoded string (taken from scratchpad)
     private hexStrToBase64(input: string): string {
         let b64pad = '=';
 
@@ -174,6 +192,7 @@ export class Request {
         return output;
     }
 
+    // Build hex enconded md5 string
     private hex_md5(s) {
         var utf8String = utf8.encode(s);
         var md5Hash = crypto.createHash('md5');
