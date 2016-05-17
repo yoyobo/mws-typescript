@@ -4,3 +4,5 @@ node_modules/
 typings/
 keys.env
 spec/csvtest.txt
+spec/fullfillmenttest.txt
+spec/qtyupdatetest.txt

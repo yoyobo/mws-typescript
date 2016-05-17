@@ -6,24 +6,28 @@ export interface FlatFileOrderFulfillmentFeedRecord {
     'order-id': string,
     'order-item-id'?: string,
     quantity?: string,
-    'ship-date': moment.Moment, //format for export: YYYY-MM-TT
-    'carrier-code'?: Carrier,
+    'ship-date'?: moment.Moment, //format for export: YYYY-MM-TT
+    'carrier-code'?: string, // valid values in enum "Carrier"
     'carrier-name'?: string,
     'tracking-number'?: string,
     'ship-method'?: string
 }
 
-// export var FlatFileOrderFulfillmentFeedOptions : CSV.Options = {
-    // columns : string[],
-    // defaults : {[ s: string] : string},
-    // firstLine : string,
-    // columnDelim : string,
-    // lineDelim : string,
-    // decSep : string,
-    // // type : string,
-    // inputEncoding : Encoding,
-    // outputEncoding : Encoding
-// }
+export var FlatFileOrderFulfillmentFeedOptions: CSV.Options = {
+    columns: ['order-id', 'ship-date', 'carrier-code', 'carrier-name', 'tracking-number', 'ship-method'],
+    defaults: {
+        'ship-date': moment().format('YYYY-MM-DD'),
+        'carrier-code': 'DHL',
+        'carrier-name': 'DHL',
+        'ship-method': 'DHL Paket'
+    },
+    firstLine: null,
+    columnDelim: "\t",
+    lineDelim: "\r\n",
+    decSep: '.',
+    inputEncoding: CSV.Encoding['UTF-8'],
+    outputEncoding: CSV.Encoding['ISO-8859-1']
+}
 
 export enum Carrier { "USPS", "UPS", "FedEx", "DHL", "Fastway", "GLS", "GO!", "Hermes Logistik Gruppe", "Royal Mail", "Parcelforce", "City Link", "TNT", "Target", "Other" };
 
@@ -37,4 +41,15 @@ export interface FlatFilePriceandQuantityUpdateFeedRecord {
     'quantity': number,
     'fulfillment-channel'?: string,
     'leadtime-to-ship'?: number
+}
+
+export var FlatFilePriceandQuantityUpdateFeedOptions: CSV.Options = {
+    columns: ['sku', 'price', 'quantity'],
+    defaults: {},
+    firstLine: null,
+    columnDelim: "\t",
+    lineDelim: "\r\n",
+    decSep: ',',
+    inputEncoding: CSV.Encoding['UTF-8'],
+    outputEncoding: CSV.Encoding['ISO-8859-1']
 }

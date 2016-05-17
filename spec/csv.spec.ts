@@ -26,10 +26,8 @@ describe('CSV', function() {
                 csv.record({ col2: 'line2_col2', col3: 'line2_col3' }, function() {
                     csv.record({ col1: 42.23, col2: 'line3_col2' }, function() {
                         csv.close(function(filePath) {
-                            console.log(filePath);
                             var generatedFileContent = fs.readFileSync(filePath, 'utf-8');
                             expect(generatedFileContent).toEqual(referenceFileContent);
-                            console.log(generatedFileContent);
                             done();
                         });
                     });
