@@ -4,6 +4,7 @@
   "private": false,
   "description" : "A typescript implementation of the Amazon MWS API",
   "main" : "js/index.js",
+  "typings" : "js/index.d.ts",
   "scripts": {
     "pretest": "tsc -p ts/spec",
     "test": "jasmine"
