@@ -1,4 +1,4 @@
-///<reference path="../typings/main.d.ts"/>
+///<reference path="../../typings/main.d.ts"/>
 import CSV = require('../csv/CSVExport');
 import fs = require('fs');
 

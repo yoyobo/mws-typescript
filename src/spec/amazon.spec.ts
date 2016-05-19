@@ -1,4 +1,4 @@
-///<reference path="../typings/main.d.ts"/>
+///<reference path="../../typings/main.d.ts"/>
 
 import moment = require('moment');
 import Amazon = require('../amazon/api');
@@ -111,7 +111,7 @@ describe('Amazon', function() {
     //         done();
     //     });
     // });
-    // 
+    //
     // it('can get a feed submission result', function(done) {
     //     var req: AmazonTypes.GetFeedSubmissionResultRequest = {
     //         // FeedSubmissionId : '104146016933'
