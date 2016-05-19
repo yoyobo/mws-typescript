@@ -10,7 +10,12 @@ import _ = require('underscore');
 
 describe('Amazon', function() {
 
-    var amazon: Amazon.MWS = new Amazon.MWS();
+    var amazon: Amazon.MWS = new Amazon.MWS({
+        sellerId: process.env.AMAZON_MERCHANT_ID,
+        awsAccountId: process.env.AMAZON_ACCESS_KEY_ID,
+        secretKey: process.env.AMAZON_SECRET_ACCESS_KEY,
+        host: 'mws.amazonservices.de'
+    });
 
     it('can list orders.', function(done) {
         var req: AmazonTypes.ListOrdersRequest = {
