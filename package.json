@@ -8,7 +8,7 @@
   "scripts": {
     "pretest": "tsc -p src/spec",
     "test": "jasmine",
-    "postinstall" : "typings install && tsc"
+    "postinstall" : "tsc && typings install"
   },
   "devDependencies": {
     "jasmine": "2.4.1"
