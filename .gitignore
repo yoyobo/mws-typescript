@@ -1,6 +1,9 @@
 node_modules/
 keys.env
-ts/spec/csvtest.txt
-ts/spec/fullfillmenttest.txt
-ts/spec/qtyupdatetest.txt
-ts/spec/bin
+src/spec/csvtest.txt
+src/spec/fullfillmenttest.txt
+src/spec/qtyupdatetest.txt
+src/spec/bin
+dist
+typings
+npm-debug.log

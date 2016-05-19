@@ -1,7 +1,7 @@
 {
   "version" : "0.1.0",
   "compilerOptions": {
-    "outDir": "../js",
+    "outDir": "dist",
     "declaration" : true,
     "module": "commonjs",
     "target": "es5",
@@ -9,7 +9,9 @@
   },
   "exclude": [
     "node_modules",
-    "spec",
-    "typings"
+    "src/spec",
+    "typings/main.d.ts",
+    "typings/main",
+    "dist"
   ]
 }
