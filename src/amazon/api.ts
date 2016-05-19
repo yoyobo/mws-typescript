@@ -28,6 +28,11 @@ module Amazon {
 
         public Feeds: Feeds.Feeds;
     }
+
+
 }
 
-export = Amazon;
+export = {
+    Amazon : Amazon,
+    AmazonTypes : AmazonTypes
+};
