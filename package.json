@@ -7,7 +7,8 @@
   "typings" : "js/index.d.ts",
   "scripts": {
     "pretest": "tsc -p ts/spec",
-    "test": "jasmine"
+    "test": "jasmine",
+    "postinstall" : "tsc -p ts"
   },
   "devDependencies": {
     "jasmine": "2.4.1"

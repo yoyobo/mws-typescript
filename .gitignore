@@ -1,5 +1,4 @@
 node_modules/
-ts/typings/
 keys.env
 ts/spec/csvtest.txt
 ts/spec/fullfillmenttest.txt
