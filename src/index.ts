@@ -1,3 +1,1 @@
-import Amazon = require('./amazon/api');
-
-export = Amazon;
+export = require('./amazon/api');
