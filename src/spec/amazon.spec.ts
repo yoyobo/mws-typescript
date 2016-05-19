@@ -21,7 +21,8 @@ describe('Amazon', function() {
         var req: AmazonTypes.ListOrdersRequest = {
             CreatedAfter: moment().subtract(24, 'hours'),
             'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
-            'OrderStatus.Status': [AmazonTypes.OrderStatus.Shipped],
+            'OrderStatus.Status': [AmazonTypes.OrderStatus.Pending],
+            'FulfillmentChannel.Channel' : [AmazonTypes.FulfillmentChannel.MFN]
         };
 
         amazon.Orders.listOrders(req, function(err, result) {
