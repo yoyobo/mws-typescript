@@ -27,8 +27,3 @@ class MWS {
 
     public Feeds: Feeds.Feeds;
 }
-
-export = {
-    MWS : MWS,
-    AmazonTypes : AmazonTypes
-};
