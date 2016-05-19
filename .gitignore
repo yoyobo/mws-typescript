@@ -1,8 +1,7 @@
 node_modules/
-.idea/
-**/bin/
-typings/
+ts/typings/
 keys.env
-spec/csvtest.txt
-spec/fullfillmenttest.txt
-spec/qtyupdatetest.txt
+ts/spec/csvtest.txt
+ts/spec/fullfillmenttest.txt
+ts/spec/qtyupdatetest.txt
+ts/spec/bin
