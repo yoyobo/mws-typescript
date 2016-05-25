@@ -100,4 +100,23 @@ export class Reports {
             }
         });
     }
+
+    public updateReportAcknowledgements(options: AmazonTypes.UpdateReportAcknowledgementsRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.UpdateReportAcknowledgementsResult) => void) {
+        var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
+        request.addParam(new AmazonTypes.StringParameter('Action', 'UpdateReportAcknowledgements'));
+        request.addParam(new AmazonTypes.StringParameter('Merchant', this.credentials.sellerId));
+        request.addParam(new AmazonTypes.StringParameter('Version', this.version));
+
+        request.addParam(new AmazonTypes.ListParameter('ReportIdList.Id', options['ReportIdList.Id']));
+
+        if (_.has(options, 'Acknowledged'))
+            request.addParam(new AmazonTypes.BooleanParameter('Acknowledged', options.Acknowledged));
+
+        request.send(function(err, result) {
+            if (err)
+                return callback(err);
+            else
+                return callback(null, new AmazonTypes.UpdateReportAcknowledgementsResult(result));
+        })
+    }
 }

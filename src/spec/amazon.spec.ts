@@ -17,21 +17,21 @@ describe('Amazon', function() {
         host: 'mws.amazonservices.de'
     });
 
-    it('can list orders.', function(done) {
-        var req: AmazonTypes.ListOrdersRequest = {
-            CreatedAfter: moment().subtract(24, 'hours'),
-            'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
-            'OrderStatus.Status': [AmazonTypes.OrderStatus.Pending],
-            'FulfillmentChannel.Channel' : [AmazonTypes.FulfillmentChannel.MFN]
-        };
-
-        amazon.Orders.listOrders(req, function(err, result) {
-            console.log('error', err);
-            console.log('first of ' + result.orderList.length + ' orders: ', result.orderList[0]);
-            expect(err).toBeFalsy();
-            done();
-        });
-    });
+    // it('can list orders.', function(done) {
+    //     var req: AmazonTypes.ListOrdersRequest = {
+    //         CreatedAfter: moment().subtract(24, 'hours'),
+    //         'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
+    //         'OrderStatus.Status': [AmazonTypes.OrderStatus.Pending],
+    //         'FulfillmentChannel.Channel' : [AmazonTypes.FulfillmentChannel.MFN]
+    //     };
+    //
+    //     amazon.Orders.listOrders(req, function(err, result) {
+    //         console.log('error', err);
+    //         console.log('first of ' + result.orderList.length + ' orders: ', result.orderList[0]);
+    //         expect(err).toBeFalsy();
+    //         done();
+    //     });
+    // });
 
     // it('can get order items.', function(done) {
     //     var req: AmazonTypes.ListOrderItemsRequest = {
@@ -131,4 +131,18 @@ describe('Amazon', function() {
     //         done();
     //     });
     // });
+
+    it('can acknowledge a report', function(done) {
+        var req: AmazonTypes.UpdateReportAcknowledgementsRequest = {
+            'ReportIdList.Id': ['2391808998016946', '2384151697016945'],
+            Acknowledged: true
+        };
+
+        amazon.Reports.updateReportAcknowledgements(req, function(err, result) {
+            console.log('error', err);
+            console.log('result', result.reportInfoList);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
 });
