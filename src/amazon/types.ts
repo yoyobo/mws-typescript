@@ -74,7 +74,12 @@ export class ListOrdersResult {
     public orderList: Order[];
     constructor(public rawData: any) {
         this.orderList = [];
+
+        if (rawData['ListOrdersResponse']['ListOrdersResult']['Orders'] == '')
+            return;
+
         var rawList = rawData['ListOrdersResponse']['ListOrdersResult']['Orders']['Order'];
+
         var orderList = _.isArray(rawList) ? rawList : [rawList];
         _.each(orderList, (value: any) => {
             var newOrder: Order = {
