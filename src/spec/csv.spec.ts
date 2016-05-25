@@ -1,5 +1,5 @@
-///<reference path="../typings/main.d.ts"/>
-import CSV = require('../lib/csv/CSVExport');
+///<reference path="../../typings/main.d.ts"/>
+import CSV = require('../csv/CSVExport');
 import fs = require('fs');
 
 describe('CSV', function() {

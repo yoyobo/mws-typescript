@@ -1,5 +1,5 @@
 import moment = require('moment');
-import CSV = require('../lib/csv/CSVExport');
+import CSV = require('../csv/CSVExport');
 export interface FlatFileOrderFulfillmentFeedRecord {
     // https://images-na.ssl-images-amazon.com/images/G/01/rainier/help/ff/release_1_9/Flat.File.ShippingConfirm.de.xls
     // _POST_FLAT_FILE_FULFILLMENT_DATA_

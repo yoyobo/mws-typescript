@@ -1,12 +1,14 @@
 {
-  "name": "pp-mws",
-  "version": "0.0.1",
-  "private": true,
+  "name": "mws-typescript",
+  "version": "0.1.0",
+  "private": false,
+  "description" : "A typescript implementation of the Amazon MWS API",
+  "main" : "dist/index.js",
+  "typings" : "dist/index.d.ts",
   "scripts": {
-    "pretest": "tsc -p spec",
+    "pretest": "tsc -p src/spec",
     "test": "jasmine",
-    "prestart": "tsc",
-    "start": "node bin/server.js"
+    "postinstall" : "typings install && tsc"
   },
   "devDependencies": {
     "jasmine": "2.4.1"
