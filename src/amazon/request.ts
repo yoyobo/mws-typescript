@@ -37,7 +37,8 @@ export class Request {
 
         var queryString: string = this.getQueryString();
 
-        console.log('queryString', queryString);
+        if (process.env.NODE_ENV == 'development')
+            console.log('MWS QueryString', queryString);
 
         var requestOptions = {
             headers: {
