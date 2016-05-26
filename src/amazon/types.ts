@@ -625,6 +625,37 @@ export interface ReportInfo {
     AcknowledgedDate?: moment.Moment
 }
 
+export interface GetReportListRequest {
+    MaxCount?: number,
+    'ReportTypeList.Type'?: ReportType[],
+    Acknowledged?: boolean,
+    AvailableFromDate?: moment.Moment,
+    AvailableToDate?: moment.Moment,
+    'ReportRequestIdList.Id'?: string[]
+}
+
+export class GetReportListResult {
+    public reportInfoList: ReportInfo[];
+    constructor(public rawData: any) {
+        this.reportInfoList = [];
+        var rawList = rawData['GetReportListResponse']['GetReportListResult']['ReportInfo'];
+        if (_.isUndefined(rawList))
+            return;
+        rawList = _.isArray(rawList) ? rawList : [rawList];
+        this.reportInfoList = _.map(rawList, (value, key, list) => {
+            var newReportInfo: ReportInfo = {
+                ReportId: value['ReportId'],
+                ReportType: ReportType['' + value['ReportType']],
+                ReportRequestId: value['ReportRequestId'],
+                AvailableDate: moment(value['AvailableDate']),
+                Acknowledged: value['Acknowledged'] === 'true',
+                AcknowledgedDate: moment(value['AcknowledgedDate'])
+            };
+            return newReportInfo;
+        });
+    }
+}
+
 
 export enum FeedProcessingStatus { _AWAITING_ASYNCHRONOUS_REPLY_, _CANCELLED_, _DONE_, _IN_PROGRESS_, _IN_SAFETY_NET_, _SUBMITTED_, _UNCONFIRMED_ };
 export enum FeedContentType { 'text/tab-separated-values; charset=iso-8859-1', 'text/xml' };

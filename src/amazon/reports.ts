@@ -117,6 +117,41 @@ export class Reports {
                 return callback(err);
             else
                 return callback(null, new AmazonTypes.UpdateReportAcknowledgementsResult(result));
-        })
+        });
+    }
+
+    public getReportList(options: AmazonTypes.GetReportListRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.GetReportListResult) => void) {
+        var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
+        request.addParam(new AmazonTypes.StringParameter('Action', 'GetReportList'));
+        request.addParam(new AmazonTypes.StringParameter('Merchant', this.credentials.sellerId));
+        request.addParam(new AmazonTypes.StringParameter('Version', this.version));
+
+        if (_.has(options, 'MaxCount'))
+            request.addParam(new AmazonTypes.StringParameter('MaxCount', options.MaxCount.toString()));
+
+        if (_.has(options, 'ReportTypeList.Type')) {
+            request.addParam(new AmazonTypes.ListParameter('ReportTypeList.Type', _.map(options['ReportTypeList.Type'], function(item) {
+                return AmazonTypes.ReportType[item];
+            })));
+        }
+
+        if (_.has(options, 'Acknowledged'))
+            request.addParam(new AmazonTypes.BooleanParameter('Acknowledged', options.Acknowledged));
+
+        if (_.has(options, 'AvailableFromDate'))
+            request.addParam(new AmazonTypes.TimestampParameter('AvailableFromDate', options.AvailableFromDate));
+
+        if (_.has(options, 'AvailableToDate'))
+            request.addParam(new AmazonTypes.TimestampParameter('AvailableToDate', options.AvailableToDate));
+
+        if (_.has(options, 'ReportRequestIdList.Id'))
+            request.addParam(new AmazonTypes.ListParameter('ReportRequestIdList.Id', options['ReportRequestIdList.Id']));
+
+        request.send(function(err, result) {
+            if (err)
+                return callback(err);
+            else
+                return callback(null, new AmazonTypes.GetReportListResult(result));
+        });
     }
 }

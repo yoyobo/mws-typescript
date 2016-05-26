@@ -33,19 +33,19 @@ describe('Amazon', function() {
     //     });
     // });
 
-    it('can get order items.', function(done) {
-        var req: AmazonTypes.ListOrderItemsRequest = {
-            // AmazonOrderId: '303-3209187-3328346'
-            AmazonOrderId: '028-4769731-4905946'
-        };
-
-        amazon.Orders.listOrderItems(req, function(err, result) {
-            console.log('error', err);
-            console.log('first of ' + result.orderItemList.length + ' order items: ', result.orderItemList[0]);
-            expect(err).toBeFalsy();
-            done();
-        });
-    });
+    // it('can get order items.', function(done) {
+    //     var req: AmazonTypes.ListOrderItemsRequest = {
+    //         // AmazonOrderId: '303-3209187-3328346'
+    //         AmazonOrderId: '028-4769731-4905946'
+    //     };
+    //
+    //     amazon.Orders.listOrderItems(req, function(err, result) {
+    //         console.log('error', err);
+    //         console.log('first of ' + result.orderItemList.length + ' order items: ', result.orderItemList[0]);
+    //         expect(err).toBeFalsy();
+    //         done();
+    //     });
+    // });
     //
     // it('can request a report.', function(done) {
     //     var req: AmazonTypes.RequestReportRequest = {
@@ -146,4 +146,20 @@ describe('Amazon', function() {
     //         done();
     //     });
     // });
+
+    it('can get report list', function(done) {
+        var req: AmazonTypes.GetReportListRequest = {
+            Acknowledged: true,
+            'ReportTypeList.Type': [AmazonTypes.ReportType._GET_FLAT_FILE_ORDERS_DATA_],
+            // AvailableFromDate : moment().subtract(24, 'hours'),
+            MaxCount: 2
+        }
+
+        amazon.Reports.getReportList(req, function(err, result) {
+            console.log('error', err);
+            console.log('result', result.reportInfoList);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
 });
