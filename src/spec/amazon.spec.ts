@@ -16,22 +16,22 @@ describe('Amazon', function() {
         secretKey: process.env.AMAZON_SECRET_ACCESS_KEY,
         host: 'mws.amazonservices.de'
     });
-
-    // it('can list orders.', function(done) {
-    //     var req: AmazonTypes.ListOrdersRequest = {
-    //         CreatedAfter: moment().subtract(24, 'hours'),
-    //         'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
-    //         'OrderStatus.Status': [AmazonTypes.OrderStatus.Pending],
-    //         'FulfillmentChannel.Channel' : [AmazonTypes.FulfillmentChannel.MFN]
-    //     };
     //
-    //     amazon.Orders.listOrders(req, function(err, result) {
-    //         console.log('error', err);
-    //         console.log('first of ' + result.orderList.length + ' orders: ', result.orderList[0]);
-    //         expect(err).toBeFalsy();
-    //         done();
-    //     });
-    // });
+    it('can list orders.', function(done) {
+        var req: AmazonTypes.ListOrdersRequest = {
+            CreatedAfter: moment().subtract(24, 'hours'),
+            'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
+            // 'OrderStatus.Status': [AmazonTypes.OrderStatus.Pending],
+            'FulfillmentChannel.Channel' : [AmazonTypes.FulfillmentChannel.MFN]
+        };
+
+        amazon.Orders.listOrders(req, function(err, result) {
+            console.log('error', err);
+            console.log('first of ' + result.orderList.length + ' orders: ', result.orderList[0]);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
 
     // it('can get order items.', function(done) {
     //     var req: AmazonTypes.ListOrderItemsRequest = {
@@ -74,20 +74,23 @@ describe('Amazon', function() {
     //     });
     // });
     //
-    // it('can get a report.', function(done) {
-    //     var req: AmazonTypes.GetReportRequest = {
-    //         ReportId: '2273836229016933'
-    //     };
+    it('can get a report.', function(done) {
+        var req: AmazonTypes.GetReportRequest = {
+            // ReportId: '2273836229016933'
+            ReportId: '2404804940016947'
+            // ReportId: '2407484865016947'
+        };
+
+        amazon.Reports.getReport(req, function(err, result) {
+            console.log('error', err);
+            if(!err)
+                console.log('First 1000 chars of result:', result.substring(0, 1000));
+            expect(err).toBeFalsy();
+            done();
+        });
     //
-    //     amazon.Reports.getReport(req, function(err, result) {
-    //         console.log('error', err);
-    //         console.log('First 200 chars of result:', result.substring(0, 200));
-    //         expect(err).toBeFalsy();
-    //         done();
-    //     })
-    //
-    // });
-    //
+    });
+
     // it('can submit a feed', function(done) {
     //     var req: AmazonTypes.SubmitFeedRequest = {
     //         FeedType: AmazonTypes.FeedType._POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA_
@@ -147,19 +150,19 @@ describe('Amazon', function() {
     //     });
     // });
 
-    it('can get report list', function(done) {
-        var req: AmazonTypes.GetReportListRequest = {
-            Acknowledged: true,
-            'ReportTypeList.Type': [AmazonTypes.ReportType._GET_FLAT_FILE_ORDERS_DATA_],
-            // AvailableFromDate : moment().subtract(24, 'hours'),
-            MaxCount: 2
-        }
-
-        amazon.Reports.getReportList(req, function(err, result) {
-            console.log('error', err);
-            console.log('result', result.reportInfoList);
-            expect(err).toBeFalsy();
-            done();
-        });
-    });
+    // it('can get report list', function(done) {
+    //     var req: AmazonTypes.GetReportListRequest = {
+    //         Acknowledged: true,
+    //         'ReportTypeList.Type': [AmazonTypes.ReportType._GET_FLAT_FILE_ORDERS_DATA_],
+    //         // AvailableFromDate : moment().subtract(24, 'hours'),
+    //         MaxCount: 2
+    //     }
+    //
+    //     amazon.Reports.getReportList(req, function(err, result) {
+    //         console.log('error', err);
+    //         console.log('result', result.reportInfoList);
+    //         expect(err).toBeFalsy();
+    //         done();
+    //     });
+    // });
 });

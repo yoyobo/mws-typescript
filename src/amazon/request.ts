@@ -4,8 +4,9 @@ import request = require('request');
 var xmlParse = require('xml2js').parseString;
 import crypto = require('crypto');
 var utf8 = require('utf8');
-
+import jsdiff = require('diff');
 import AmazonTypes = require('./types');
+var Iconv = require('iconv').Iconv;
 
 export class Request {
     private parameters: AmazonTypes.Parameter[];
@@ -44,7 +45,8 @@ export class Request {
             headers: {
                 'x-amazon-user-agent': userAgent,
                 'Content-Type': contentType
-            }
+            },
+            encoding: null
         };
 
         // Handle body data
@@ -60,19 +62,22 @@ export class Request {
             else {
                 // Detect non xml content and return without parsing
                 if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'].match(/^text\/plain/)) {
+                    var contentType = httpResponse.headers['content-type'];
+                    contentType = contentType.substr(contentType.indexOf("=") + 1);
+
+                    if (process.env.NODE_ENV == 'development')
+                        console.log('contentType of response', contentType);
+
+                    var converter = new Iconv(contentType, 'UTF-8');
+                    var convertedBody = converter.convert(body).toString();
                     if (_.has(httpResponse.headers, 'content-md5')) {
+                        // Catch md5 mismatch error
                         var calcResMd5 = this.hexStrToBase64(this.hex_md5(body));
-                        if (calcResMd5 !== httpResponse.headers['content-md5']) {
-                            // Catch md5 mismatch error
-                            callback({ origin: 'MD5-Comparison', message: 'MD5-Mismatch', metadata: { 'computedMd5FromResponse': calcResMd5, 'md5FromResponseHeader': httpResponse.headers['content-md5'] } });
-                        }
-                        else {
-                            // Return raw result
-                            callback(null, body);
-                        }
-                    } else {
+                        if (calcResMd5 !== httpResponse.headers['content-md5'])
+                            return callback({ origin: 'MD5-Comparison', message: 'MD5-Mismatch', metadata: { 'computedMd5FromResponse': calcResMd5, 'md5FromResponseHeader': httpResponse.headers['content-md5'] } });
+
                         // Return raw result
-                        callback(null, body);
+                        return callback(null, convertedBody);
                     }
                 }
                 else {
@@ -91,6 +96,7 @@ export class Request {
                     });
                 }
             }
+
         });
     }
 
@@ -195,9 +201,9 @@ export class Request {
 
     // Build hex enconded md5 string
     private hex_md5(s) {
-        var utf8String = utf8.encode(s);
+        // var utf8String = utf8.encode(s);
         var md5Hash = crypto.createHash('md5');
-        md5Hash.update(utf8String);
+        md5Hash.update(s);
         return md5Hash.digest('hex');
     }
 }

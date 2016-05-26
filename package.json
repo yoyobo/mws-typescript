@@ -2,13 +2,13 @@
   "name": "mws-typescript",
   "version": "0.1.0",
   "private": false,
-  "description" : "A typescript implementation of the Amazon MWS API",
-  "main" : "dist/index.js",
-  "typings" : "dist/index.d.ts",
+  "description": "A typescript implementation of the Amazon MWS API",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "pretest": "tsc -p src/spec",
     "test": "jasmine",
-    "postinstall" : "typings install && tsc"
+    "postinstall": "typings install && tsc"
   },
   "devDependencies": {
     "jasmine": "2.4.1"
