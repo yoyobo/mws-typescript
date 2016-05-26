@@ -4,7 +4,6 @@ import request = require('request');
 var xmlParse = require('xml2js').parseString;
 import crypto = require('crypto');
 var utf8 = require('utf8');
-import jsdiff = require('diff');
 import AmazonTypes = require('./types');
 var Iconv = require('iconv').Iconv;
 
