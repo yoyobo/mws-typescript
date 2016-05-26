@@ -234,7 +234,17 @@ export class ListOrderItemsResult {
     public orderItemList: OrderItem[];
     constructor(public rawData: any) {
         this.orderItemList = [];
-        _.each(rawData['ListOrderItemsResponse']['ListOrderItemsResult']['OrderItems'], (value: any) => {
+
+
+
+        if (rawData['ListOrderItemsResponse']['ListOrderItemsResult']['OrderItems'] == '')
+            return;
+
+        var rawList = rawData['ListOrderItemsResponse']['ListOrderItemsResult']['OrderItems']['OrderItem'];
+
+        var itemList = _.isArray(rawList) ? rawList : [rawList];
+
+        _.each(itemList, (value: any) => {
             var newOrderItem: OrderItem = {
                 ASIN: value['ASIN'],
                 OrderItemId: value['OrderItemId'],

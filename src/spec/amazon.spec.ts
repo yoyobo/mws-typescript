@@ -33,18 +33,19 @@ describe('Amazon', function() {
     //     });
     // });
 
-    // it('can get order items.', function(done) {
-    //     var req: AmazonTypes.ListOrderItemsRequest = {
-    //         AmazonOrderId: '303-3209187-3328346'
-    //     };
-    //
-    //     amazon.Orders.listOrderItems(req, function(err, result) {
-    //         console.log('error', err);
-    //         console.log('first of ' + result.orderItemList.length + ' order items: ', result.orderItemList[0]);
-    //         expect(err).toBeFalsy();
-    //         done();
-    //     });
-    // });
+    it('can get order items.', function(done) {
+        var req: AmazonTypes.ListOrderItemsRequest = {
+            // AmazonOrderId: '303-3209187-3328346'
+            AmazonOrderId: '028-4769731-4905946'
+        };
+
+        amazon.Orders.listOrderItems(req, function(err, result) {
+            console.log('error', err);
+            console.log('first of ' + result.orderItemList.length + ' order items: ', result.orderItemList[0]);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
     //
     // it('can request a report.', function(done) {
     //     var req: AmazonTypes.RequestReportRequest = {
@@ -132,17 +133,17 @@ describe('Amazon', function() {
     //     });
     // });
 
-    it('can acknowledge a report', function(done) {
-        var req: AmazonTypes.UpdateReportAcknowledgementsRequest = {
-            'ReportIdList.Id': ['2391808998016946', '2384151697016945'],
-            Acknowledged: true
-        };
-
-        amazon.Reports.updateReportAcknowledgements(req, function(err, result) {
-            console.log('error', err);
-            console.log('result', result.reportInfoList);
-            expect(err).toBeFalsy();
-            done();
-        });
-    });
+    // it('can acknowledge a report', function(done) {
+    //     var req: AmazonTypes.UpdateReportAcknowledgementsRequest = {
+    //         'ReportIdList.Id': ['2391808998016946', '2384151697016945'],
+    //         Acknowledged: true
+    //     };
+    //
+    //     amazon.Reports.updateReportAcknowledgements(req, function(err, result) {
+    //         console.log('error', err);
+    //         console.log('result', result.reportInfoList);
+    //         expect(err).toBeFalsy();
+    //         done();
+    //     });
+    // });
 });
