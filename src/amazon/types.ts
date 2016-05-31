@@ -70,6 +70,121 @@ export interface Order {
     IsPremiumOrder?: boolean,
 }
 
+export class OrderConverter {
+    public static convertFromParsedXML(value: any): Order {
+        var newOrder: Order = {
+            AmazonOrderId: value['AmazonOrderId'],
+            PurchaseDate: moment(value['PurchaseDate']),
+            LastUpdateDate: moment(value['LastUpdateDate']),
+            OrderStatus: OrderStatus['' + value['OrderStatus']],
+            MarketplaceId: MarketplaceId['' + value['MarketplaceId']],
+            OrderType: OrderType['' + value['OrderType']],
+        };
+
+        if (_.has(value, 'SellerOrderId'))
+            newOrder.SellerOrderId = value['SellerOrderId'];
+
+        if (_.has(value, 'FulfillmentChannel'))
+            newOrder.FulfillmentChannel = FulfillmentChannel['' + value['FulfillmentChannel']];
+
+        if (_.has(value, 'SalesChannel'))
+            newOrder.SalesChannel = value['SalesChannel'];
+
+        if (_.has(value, 'OrderChannel'))
+            newOrder.OrderChannel = value['OrderChannel'];
+
+        if (_.has(value, 'ShipServiceLevel'))
+            newOrder.ShipServiceLevel = value['ShipServiceLevel'];
+
+        if (_.has(value, 'ShippingAddress')) {
+            var shipAddress: Address = {
+                Name: value['ShippingAddress']['Name'],
+                City: value['ShippingAddress']['City'],
+                County: value['ShippingAddress']['County'],
+                District: value['ShippingAddress']['District'],
+                StateOrRegion: value['ShippingAddress']['StateOrRegion'],
+                PostalCode: value['ShippingAddress']['PostalCode'],
+                CountryCode: value['ShippingAddress']['CountryCode'],
+                Phone: value['ShippingAddress']['Phone']
+            }
+
+            if (_.has(value['ShippingAddress'], 'AddressLine1'))
+                shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine1'];
+            if (_.has(value['ShippingAddress'], 'AddressLine2'))
+                shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine2'];
+            if (_.has(value['ShippingAddress'], 'AddressLine3'))
+                shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine3'];
+
+            newOrder.ShippingAddress = shipAddress;
+        }
+
+
+        if (_.has(value, 'OrderTotal')) {
+            var orderTotal: Money = {
+                CurrencyCode: value['OrderTotal']['CurrencyCode'],
+                Amount: parseFloat(value['OrderTotal']['Amount'])
+            }
+            newOrder.OrderTotal = orderTotal;
+        }
+
+        if (_.has(value, 'NumberOfItemsShipped'))
+            newOrder.NumberOfItemsShipped = parseInt(value['NumberOfItemsShipped']);
+
+        if (_.has(value, 'NumberOfItemsUnshipped'))
+            newOrder.NumberOfItemsUnshipped = parseInt(value['NumberOfItemsUnshipped']);
+
+        if (_.has(value, 'PaymentExecutionDetail'))
+            newOrder.PaymentExecutionDetail = value['PaymentExecutionDetail'];
+
+        if (_.has(value, 'PaymentMethod'))
+            newOrder.PaymentMethod = PaymentMethod['' + value['PaymentMethod']];
+
+        if (_.has(value, 'BuyerEmail'))
+            newOrder.BuyerEmail = value['BuyerEmail'];
+
+        if (_.has(value, 'BuyerName'))
+            newOrder.BuyerName = value['BuyerName'];
+
+        if (_.has(value, 'IsBusinessOrder'))
+            newOrder.IsBusinessOrder = value['IsBusinessOrder'] === 'true';
+
+        if (_.has(value, 'PurchaseOrderNumber'))
+            newOrder.PurchaseOrderNumber = value['PurchaseOrderNumber'];
+
+        if (_.has(value, 'ShipmentServiceLevelCategory'))
+            newOrder.ShipmentServiceLevelCategory = ShipmentServiceLevelCategory['' + value['ShipmentServiceLevelCategory']];
+
+        if (_.has(value, 'ShippedByAmazonTFM'))
+            newOrder.ShippedByAmazonTFM = value['ShippedByAmazonTFM'] === 'true';
+
+        if (_.has(value, 'TFMShipmentStatus'))
+            newOrder.TFMShipmentStatus = value['TFMShipmentStatus'];
+
+        if (_.has(value, 'CbaDisplayableShippingLabel'))
+            newOrder.CbaDisplayableShippingLabel = value['CbaDisplayableShippingLabel'];
+
+        if (_.has(value, 'EarliestShipDate'))
+            newOrder.EarliestShipDate = moment(value['EarliestShipDate']);
+
+        if (_.has(value, 'LatestShipDate'))
+            newOrder.LatestShipDate = moment(value['LatestShipDate']);
+
+        if (_.has(value, 'EarliestDeliveryDate'))
+            newOrder.EarliestDeliveryDate = moment(value['EarliestDeliveryDate']);
+
+        if (_.has(value, 'LatestDeliveryDate'))
+            newOrder.LatestDeliveryDate = moment(value['LatestDeliveryDate']);
+
+        if (_.has(value, 'IsPrime'))
+            newOrder.IsPrime = value['IsPrime'] === 'true';
+
+        if (_.has(value, 'IsPremiumOrder'))
+            newOrder.IsPremiumOrder = value['IsPremiumOrder'] === 'true';
+
+        return newOrder;
+    }
+}
+
 export class ListOrdersResult {
     public orderList: Order[];
     constructor(public rawData: any) {
@@ -81,118 +196,8 @@ export class ListOrdersResult {
         var rawList = rawData['ListOrdersResponse']['ListOrdersResult']['Orders']['Order'];
 
         var orderList = _.isArray(rawList) ? rawList : [rawList];
-        _.each(orderList, (value: any) => {
-            var newOrder: Order = {
-                AmazonOrderId: value['AmazonOrderId'],
-                PurchaseDate: moment(value['PurchaseDate']),
-                LastUpdateDate: moment(value['LastUpdateDate']),
-                OrderStatus: OrderStatus['' + value['OrderStatus']],
-                MarketplaceId: MarketplaceId['' + value['MarketplaceId']],
-                OrderType: OrderType['' + value['OrderType']],
-            };
 
-            if (_.has(value, 'SellerOrderId'))
-                newOrder.SellerOrderId = value['SellerOrderId'];
-
-            if (_.has(value, 'FulfillmentChannel'))
-                newOrder.FulfillmentChannel = FulfillmentChannel['' + value['FulfillmentChannel']];
-
-            if (_.has(value, 'SalesChannel'))
-                newOrder.SalesChannel = value['SalesChannel'];
-
-            if (_.has(value, 'OrderChannel'))
-                newOrder.OrderChannel = value['OrderChannel'];
-
-            if (_.has(value, 'ShipServiceLevel'))
-                newOrder.ShipServiceLevel = value['ShipServiceLevel'];
-
-            if (_.has(value, 'ShippingAddress')) {
-                var shipAddress: Address = {
-                    Name: value['ShippingAddress']['Name'],
-                    City: value['ShippingAddress']['City'],
-                    County: value['ShippingAddress']['County'],
-                    District: value['ShippingAddress']['District'],
-                    StateOrRegion: value['ShippingAddress']['StateOrRegion'],
-                    PostalCode: value['ShippingAddress']['PostalCode'],
-                    CountryCode: value['ShippingAddress']['CountryCode'],
-                    Phone: value['ShippingAddress']['Phone']
-                }
-
-                if (_.has(value['ShippingAddress'], 'AddressLine1'))
-                    shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine1'];
-                if (_.has(value['ShippingAddress'], 'AddressLine2'))
-                    shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine2'];
-                if (_.has(value['ShippingAddress'], 'AddressLine3'))
-                    shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine3'];
-
-                newOrder.ShippingAddress = shipAddress;
-            }
-
-
-            if (_.has(value, 'OrderTotal')) {
-                var orderTotal: Money = {
-                    CurrencyCode: value['OrderTotal']['CurrencyCode'],
-                    Amount: parseFloat(value['OrderTotal']['Amount'])
-                }
-                newOrder.OrderTotal = orderTotal;
-            }
-
-            if (_.has(value, 'NumberOfItemsShipped'))
-                newOrder.NumberOfItemsShipped = parseInt(value['NumberOfItemsShipped']);
-
-            if (_.has(value, 'NumberOfItemsUnshipped'))
-                newOrder.NumberOfItemsUnshipped = parseInt(value['NumberOfItemsUnshipped']);
-
-            if (_.has(value, 'PaymentExecutionDetail'))
-                newOrder.PaymentExecutionDetail = value['PaymentExecutionDetail'];
-
-            if (_.has(value, 'PaymentMethod'))
-                newOrder.PaymentMethod = PaymentMethod['' + value['PaymentMethod']];
-
-            if (_.has(value, 'BuyerEmail'))
-                newOrder.BuyerEmail = value['BuyerEmail'];
-
-            if (_.has(value, 'BuyerName'))
-                newOrder.BuyerName = value['BuyerName'];
-
-            if (_.has(value, 'IsBusinessOrder'))
-                newOrder.IsBusinessOrder = value['IsBusinessOrder'] === 'true';
-
-            if (_.has(value, 'PurchaseOrderNumber'))
-                newOrder.PurchaseOrderNumber = value['PurchaseOrderNumber'];
-
-            if (_.has(value, 'ShipmentServiceLevelCategory'))
-                newOrder.ShipmentServiceLevelCategory = ShipmentServiceLevelCategory['' + value['ShipmentServiceLevelCategory']];
-
-            if (_.has(value, 'ShippedByAmazonTFM'))
-                newOrder.ShippedByAmazonTFM = value['ShippedByAmazonTFM'] === 'true';
-
-            if (_.has(value, 'TFMShipmentStatus'))
-                newOrder.TFMShipmentStatus = value['TFMShipmentStatus'];
-
-            if (_.has(value, 'CbaDisplayableShippingLabel'))
-                newOrder.CbaDisplayableShippingLabel = value['CbaDisplayableShippingLabel'];
-
-            if (_.has(value, 'EarliestShipDate'))
-                newOrder.EarliestShipDate = moment(value['EarliestShipDate']);
-
-            if (_.has(value, 'LatestShipDate'))
-                newOrder.LatestShipDate = moment(value['LatestShipDate']);
-
-            if (_.has(value, 'EarliestDeliveryDate'))
-                newOrder.EarliestDeliveryDate = moment(value['EarliestDeliveryDate']);
-
-            if (_.has(value, 'LatestDeliveryDate'))
-                newOrder.LatestDeliveryDate = moment(value['LatestDeliveryDate']);
-
-            if (_.has(value, 'IsPrime'))
-                newOrder.IsPrime = value['IsPrime'] === 'true';
-
-            if (_.has(value, 'IsPremiumOrder'))
-                newOrder.IsPremiumOrder = value['IsPremiumOrder'] === 'true';
-
-            this.orderList.push(newOrder);
-        });
+        this.orderList = _.map(orderList, OrderConverter.convertFromParsedXML);
     }
 }
 
@@ -372,6 +377,22 @@ export class ListOrderItemsResult {
 
             this.orderItemList.push(newOrderItem);
         });
+    }
+}
+
+export interface GetOrderRequest {
+    'AmazonOrderId.Id': string[]
+}
+
+export class GetOrderResult {
+    public order: Order;
+    constructor(public rawData: any) {
+        if (rawData['GetOrderResponse']['GetOrderResult']['Orders'] == '')
+            return;
+
+        var rawItem = rawData['GetOrderResponse']['GetOrderResult']['Orders']['Order'];
+
+        this.order = OrderConverter.convertFromParsedXML(rawItem);
     }
 }
 

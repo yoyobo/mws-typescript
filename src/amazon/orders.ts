@@ -96,4 +96,23 @@ export class Orders {
             }
         });
     }
+
+    public getOrder(options: AmazonTypes.GetOrderRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.GetOrderResult) => void) {
+        var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
+
+        request.addParam(new AmazonTypes.StringParameter('Action', 'GetOrder'));
+        request.addParam(new AmazonTypes.StringParameter('SellerId', this.credentials.sellerId));
+
+        request.addParam(new AmazonTypes.StringParameter('Version', this.version));
+        request.addParam(new AmazonTypes.ListParameter('AmazonOrderId.Id', options['AmazonOrderId.Id']));
+
+        request.send(function(err, result) {
+            if (err) {
+                callback(err);
+            }
+            else {
+                callback(null, new AmazonTypes.GetOrderResult(result));
+            }
+        });
+    }
 }

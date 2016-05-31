@@ -22,7 +22,7 @@ describe('Amazon', function() {
             CreatedAfter: moment().subtract(24, 'hours'),
             'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
             // 'OrderStatus.Status': [AmazonTypes.OrderStatus.Pending],
-            'FulfillmentChannel.Channel' : [AmazonTypes.FulfillmentChannel.MFN]
+            'FulfillmentChannel.Channel': [AmazonTypes.FulfillmentChannel.MFN]
         };
 
         amazon.Orders.listOrders(req, function(err, result) {
@@ -74,22 +74,22 @@ describe('Amazon', function() {
     //     });
     // });
     //
-    it('can get a report.', function(done) {
-        var req: AmazonTypes.GetReportRequest = {
-            // ReportId: '2273836229016933'
-            ReportId: '2404804940016947'
-            // ReportId: '2407484865016947'
-        };
-
-        amazon.Reports.getReport(req, function(err, result) {
-            console.log('error', err);
-            if(!err)
-                console.log('First 1000 chars of result:', result.substring(0, 1000));
-            expect(err).toBeFalsy();
-            done();
-        });
+    // it('can get a report.', function(done) {
+    //     var req: AmazonTypes.GetReportRequest = {
+    //         // ReportId: '2273836229016933'
+    //         ReportId: '2404804940016947'
+    //         // ReportId: '2407484865016947'
+    //     };
     //
-    });
+    //     amazon.Reports.getReport(req, function(err, result) {
+    //         console.log('error', err);
+    //         if(!err)
+    //             console.log('First 1000 chars of result:', result.substring(0, 1000));
+    //         expect(err).toBeFalsy();
+    //         done();
+    //     });
+    // //
+    // });
 
     // it('can submit a feed', function(done) {
     //     var req: AmazonTypes.SubmitFeedRequest = {
@@ -165,4 +165,18 @@ describe('Amazon', function() {
     //         done();
     //     });
     // });
+
+    it('can get an order.', function(done) {
+        var req: AmazonTypes.GetOrderRequest = {
+            'AmazonOrderId.Id': ['028-4769731-4905946']
+        };
+
+        amazon.Orders.getOrder(req, function(err, result) {
+            console.log('error', err);
+            console.log('resulting order', result.order);
+            expect(err).toBeFalsy();
+            done();
+        });
+
+    });
 });
