@@ -699,7 +699,7 @@ export enum ConditionId { New, Used, Collectible, Refurbished, Preorder, Club };
 
 export enum ConditionSubtypeId { New, Mint, 'Very Good', Good, Acceptable, Poor, Club, OEM, Warranty, 'Refurbished Warranty', Refurbished, 'Open Box', Any, Other }
 
-export enum OrderStatus { Pending, Unshipped, PartiallyShipped, Shipped };
+export enum OrderStatus { Pending, Unshipped, PartiallyShipped, Shipped, Canceled };
 
 export enum FulfillmentChannel { AFN, MFN };
 
