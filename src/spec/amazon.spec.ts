@@ -17,21 +17,21 @@ describe('Amazon', function() {
         host: 'mws.amazonservices.de'
     });
     //
-    it('can list orders.', function(done) {
-        var req: AmazonTypes.ListOrdersRequest = {
-            CreatedAfter: moment().subtract(24, 'hours'),
-            'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
-            // 'OrderStatus.Status': [AmazonTypes.OrderStatus.Pending],
-            'FulfillmentChannel.Channel': [AmazonTypes.FulfillmentChannel.MFN]
-        };
-
-        amazon.Orders.listOrders(req, function(err, result) {
-            console.log('error', err);
-            console.log('first of ' + result.orderList.length + ' orders: ', result.orderList[0]);
-            expect(err).toBeFalsy();
-            done();
-        });
-    });
+    // it('can list orders.', function(done) {
+    //     var req: AmazonTypes.ListOrdersRequest = {
+    //         CreatedAfter: moment().subtract(24, 'hours'),
+    //         'MarketplaceId.Id': [AmazonTypes.MarketplaceId.A1PA6795UKMFR9],
+    //         // 'OrderStatus.Status': [AmazonTypes.OrderStatus.Pending],
+    //         'FulfillmentChannel.Channel': [AmazonTypes.FulfillmentChannel.MFN]
+    //     };
+    //
+    //     amazon.Orders.listOrders(req, function(err, result) {
+    //         console.log('error', err);
+    //         console.log('first of ' + result.orderList.length + ' orders: ', result.orderList[0]);
+    //         expect(err).toBeFalsy();
+    //         done();
+    //     });
+    // });
 
     // it('can get order items.', function(done) {
     //     var req: AmazonTypes.ListOrderItemsRequest = {
@@ -166,17 +166,17 @@ describe('Amazon', function() {
     //     });
     // });
 
-    it('can get an order.', function(done) {
-        var req: AmazonTypes.GetOrderRequest = {
-            'AmazonOrderId.Id': ['028-4769731-4905946']
-        };
-
-        amazon.Orders.getOrder(req, function(err, result) {
-            console.log('error', err);
-            console.log('resulting order', result.order);
-            expect(err).toBeFalsy();
-            done();
-        });
-
-    });
+    // it('can get an order.', function(done) {
+    //     var req: AmazonTypes.GetOrderRequest = {
+    //         'AmazonOrderId.Id': ['028-4769731-4905946']
+    //     };
+    //
+    //     amazon.Orders.getOrder(req, function(err, result) {
+    //         console.log('error', err);
+    //         console.log('resulting order', result.order);
+    //         expect(err).toBeFalsy();
+    //         done();
+    //     });
+    //
+    // });
 });

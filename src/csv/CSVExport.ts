@@ -22,6 +22,62 @@ export interface CloseCallback {
 }
 
 export enum Encoding { 'UTF-8', 'ISO-8859-1' };
+
+export class CSVGenerator {
+    private escReg: RegExp;
+    private converter: any;
+    private completeOutput : string;
+
+    constructor(private options: Options){
+        this.escReg = new RegExp('"', 'g');
+        this.converter = new Iconv(Encoding[options.inputEncoding], Encoding[options.outputEncoding]);
+        this.completeOutput = '';
+    }
+
+    public start(){
+        var header = '';
+
+        // Insert first line if necessary
+        if (!!this.options.firstLine)
+            header += this.options.firstLine + this.options.lineDelim;
+
+        // Build column line
+        header += this.options.columns.join(this.options.columnDelim) + this.options.lineDelim;
+
+        this.completeOutput+=header;
+    }
+
+    public record(data : Object){
+        var self = this;
+        var outputString = '';
+
+        _.each(this.options.columns, (elm, index, list) => {
+            // Take value from input data or default value or empty string (in this order) and escape the result
+            var dataValue: string = this.escapeString(_.has(data, elm) ? data[elm] : (_.has(self.options.defaults, elm) ? self.options.defaults[elm] : ''));
+            if (_.isNumber(dataValue))
+                dataValue = dataValue.toString().replace('.', self.options.decSep);
+
+            // Append column separator, if not in last column
+            outputString += (!dataValue ? '' : dataValue) + ((index == list.length - 1) ? '' : self.options.columnDelim);
+        });
+
+        outputString += this.options.lineDelim;
+
+        this.completeOutput+=outputString;
+    }
+
+    public getOutputString() : string {
+        return this.completeOutput;
+    }
+
+    private escapeString(str) {
+        if (this.escReg.test(str)) {
+            str = '"' + str.replace(this.escReg, '""') + '"';
+        }
+        return str;
+    }
+}
+
 export class CSVExport {
 
     private options: Options;
