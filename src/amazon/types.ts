@@ -515,7 +515,10 @@ export class GetReportRequestListResult {
     public reportRequestInfoList: ReportRequestInfo[];
     constructor(public rawData: any) {
         this.reportRequestInfoList = [];
-        _.each(rawData['GetReportRequestListResponse']['GetReportRequestListResult']['ReportRequestInfo'], (item: any) => {
+
+        var rawList = rawData['GetReportRequestListResponse']['GetReportRequestListResult']['ReportRequestInfo'];
+        rawList = _.isArray(rawList) ? rawList : [rawList];
+        _.each(rawList, (item: any) => {
             var newReportRequestInfo: ReportRequestInfo = {
                 ReportRequestId: item['ReportRequestId'],
                 ReportType: ReportType['' + item['ReportType']],

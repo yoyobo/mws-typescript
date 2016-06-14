@@ -61,18 +61,18 @@ describe('Amazon', function() {
     //     });
     // });
     //
-    // it('can get report request list.', function(done) {
-    //     var req: AmazonTypes.GetReportRequestListRequest = {
-    //         'ReportTypeList.Type': [AmazonTypes.ReportType._GET_FLAT_FILE_OPEN_LISTINGS_DATA_, AmazonTypes.ReportType._GET_FLAT_FILE_ORDERS_DATA_]
-    //     };
-    //
-    //     amazon.Reports.getReportRequestList(req, function(err, result) {
-    //         console.log('error', err);
-    //         console.log('First of ' + result.reportRequestInfoList.length + ' GetReportRequestListResult: ', result.reportRequestInfoList[0]);
-    //         expect(err).toBeFalsy();
-    //         done();
-    //     });
-    // });
+    it('can get report request list.', function(done) {
+        var req: AmazonTypes.GetReportRequestListRequest = {
+            'ReportTypeList.Type': [AmazonTypes.ReportType._GET_FLAT_FILE_OPEN_LISTINGS_DATA_, AmazonTypes.ReportType._GET_FLAT_FILE_ORDERS_DATA_]
+        };
+
+        amazon.Reports.getReportRequestList(req, function(err, result) {
+            console.log('error', err);
+            console.log('First of ' + result.reportRequestInfoList.length + ' GetReportRequestListResult: ', result.reportRequestInfoList[0]);
+            expect(err).toBeFalsy();
+            done();
+        });
+    });
     //
     // it('can get a report.', function(done) {
     //     var req: AmazonTypes.GetReportRequest = {
