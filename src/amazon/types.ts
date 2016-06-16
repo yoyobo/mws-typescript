@@ -684,7 +684,7 @@ export class GetReportListResult {
 export enum FeedProcessingStatus { _AWAITING_ASYNCHRONOUS_REPLY_, _CANCELLED_, _DONE_, _IN_PROGRESS_, _IN_SAFETY_NET_, _SUBMITTED_, _UNCONFIRMED_ };
 export enum FeedContentType { 'text/tab-separated-values; charset=iso-8859-1', 'text/xml' };
 
-export enum FeedType { '_POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA_', '_POST_ORDER_FULFILLMENT_DATA_' };
+export enum FeedType { _POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA_, _POST_ORDER_FULFILLMENT_DATA_, _POST_FLAT_FILE_FULFILLMENT_DATA_ };
 export var MarketplaceIdDic: Dictionary<string> = {
     'A1PA6795UKMFR9': 'DE',
     'A1RKKUPIHCS9HS': 'ES',
