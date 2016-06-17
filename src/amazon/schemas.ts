@@ -18,7 +18,6 @@ export var FlatFileOrderFulfillmentFeedOptions: CSV.Options = {
     defaults: {
         'ship-date': moment().format('YYYY-MM-DD'),
         'carrier-code': 'DHL',
-        'carrier-name': 'DHL',
         'ship-method': 'DHL Paket'
     },
     firstLine: null,
